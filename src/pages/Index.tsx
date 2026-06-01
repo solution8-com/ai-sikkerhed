@@ -218,7 +218,7 @@ function DashboardView({ onNavigate }: { onNavigate: (v: View, p?: RiskPillar) =
           { label: "Risikokategorier", value: riskCategories.length, color: "text-foreground" },
           { label: "Sub-risici sporet", value: totalRisks, color: "text-info" },
           { label: "Kritiske risici", value: criticalCount, color: "text-danger" },
-          { label: "Kildeframeworks", value: 8, color: "text-primary" },
+          { label: "Kilder", value: 8, color: "text-primary" },
         ].map((stat) => (
           <div key={stat.label} className="rounded-lg border border-border bg-card p-5 border-glow">
             <p className={`font-display text-3xl font-bold ${stat.color}`}>{stat.value}</p>
