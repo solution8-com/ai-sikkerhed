@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import logo from "@/assets/logo.png";
-import { Shield, ExternalLink, ChevronRight, ChevronDown, ArrowLeft, Search } from "lucide-react";
+import { ExternalLink, ChevronRight, ChevronDown, ArrowLeft, Search } from "lucide-react";
 import {
   pillars,
   riskCategories,
@@ -13,6 +13,10 @@ import {
 } from "@/data/riskData";
 
 type View = "dashboard" | "pillar" | "category" | "subcategory";
+
+const CALENDLY_URL = "https://calendly.com/ai-raadgivning_jacob/30min?month=2026-06";
+// MailerLite form — shared with compliance temporarily; swap to a sikkerhed-specific form once created
+const MAILERLITE_ACTION = "https://assets.mailerlite.com/jsonp/1571946/forms/189012812467536974/subscribe";
 
 const Index = () => {
   const [view, setView] = useState<View>("dashboard");
@@ -92,6 +96,14 @@ const Index = () => {
               >
                 OWASP GenAI <ExternalLink className="h-3 w-3" />
               </a>
+              <a
+                href={CALENDLY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Book sparring
+              </a>
             </div>
           </div>
         </div>
@@ -153,6 +165,9 @@ const Index = () => {
         )}
       </main>
 
+      {/* Newsletter + CTA strip */}
+      <NewsletterCTA />
+
       {/* Footer */}
       <footer className="border-t border-border bg-card/50 py-6">
         <div className="container mx-auto px-6 text-center text-xs text-muted-foreground">
@@ -166,6 +181,10 @@ const Index = () => {
               OWASP GenAI Security Project
             </a>
             . For alle detaljer, besøg de originale repositories.
+          </p>
+          <p className="mt-3">
+            En oversigt fra{" "}
+            <a href="https://ai-raadgivning.dk" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">AI Rådgivning</a>.
           </p>
         </div>
       </footer>
@@ -186,7 +205,7 @@ function DashboardView({ onNavigate }: { onNavigate: (v: View, p?: RiskPillar) =
       {/* Hero */}
       <div className="mb-10">
         <h2 className="font-display text-3xl font-bold text-foreground">
-          AI-risiko <span className="text-primary text-glow">Overblik</span>
+          AI Risici <span className="text-primary text-glow">Overblik</span>
         </h2>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           Omfattende risikovurdering på tværs af Strategi, Mennesker og Udvikling — baseret på MIT AI Risk Repository (1700+ risici, 7 domæner), OWASP Top 10 for LLM'er 2025, OWASP Top 10 for Agentiske Applikationer 2026 og OWASP Agentic Security Initiative-guides.
@@ -530,7 +549,104 @@ function SubcategoryView({
           ))}
         </div>
       </div>
+
+      {/* Sparring CTA */}
+      <div className="mt-8 rounded-xl border border-primary/30 bg-primary/5 p-6 text-center">
+        <h3 className="font-display text-lg font-semibold text-foreground">Brug for sparring på denne risiko?</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Book et 30-min sparringsmøde med AI Rådgivning — vi hjælper danske organisationer med at vurdere, mitigere og styre AI-risici i praksis.
+        </p>
+        <a
+          href={CALENDLY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-block rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+        >
+          Book 30-min sparring
+        </a>
+      </div>
     </div>
+  );
+}
+
+// ── Newsletter + main CTA strip ──
+function NewsletterCTA() {
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [email, setEmail] = useState("");
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!email) return;
+    setStatus("loading");
+    try {
+      const formData = new FormData();
+      formData.append("fields[email]", email);
+      formData.append("ml-submit", "1");
+      formData.append("anticsrf", "true");
+      await fetch(MAILERLITE_ACTION, {
+        method: "POST",
+        body: formData,
+        mode: "no-cors",
+      });
+      setStatus("success");
+      setEmail("");
+    } catch {
+      setStatus("error");
+    }
+  };
+
+  return (
+    <section className="border-t border-border bg-card/30 py-12">
+      <div className="container mx-auto grid gap-8 px-6 md:grid-cols-2">
+        <div className="rounded-xl border border-border bg-card p-6">
+          <h3 className="font-display text-lg font-semibold text-foreground">📬 Nyhedsbrev: AI Sikkerhed i praksis</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Månedlig opdatering om AI-risici, nye OWASP-/MIT-frameworks, threat intelligence og praktiske mitigeringer for danske virksomheder.
+          </p>
+          {status === "success" ? (
+            <div className="mt-4 rounded-md border border-success/30 bg-success/10 p-4 text-sm text-success">
+              ✓ Tak! Du er nu tilmeldt — tjek din indbakke for bekræftelse.
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="din@email.dk"
+                disabled={status === "loading"}
+                className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-60"
+              />
+              <button
+                type="submit"
+                disabled={status === "loading"}
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {status === "loading" ? "Tilmelder…" : "Tilmeld"}
+              </button>
+            </form>
+          )}
+          {status === "error" && (
+            <p className="mt-2 text-xs text-danger">Noget gik galt. Prøv igen om lidt.</p>
+          )}
+        </div>
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-6">
+          <h3 className="font-display text-lg font-semibold text-foreground">🗓️ Book 30-min sparring</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Konkret sparring om jeres AI-risikobillede — kortlægning, mitigeringer, governance, leverandørsikkerhed eller noget helt andet.
+          </p>
+          <a
+            href={CALENDLY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-block rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            Find en tid hos Jacob
+          </a>
+        </div>
+      </div>
+    </section>
   );
 }
 
