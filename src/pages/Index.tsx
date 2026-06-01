@@ -282,7 +282,7 @@ const Index = () => {
 };
 
 // ── Dashboard View ──
-function DashboardView({ onNavigate }: { onNavigate: (v: View, p?: RiskPillar) => void }) {
+function DashboardView({ onNavigate }: { onNavigate: (v: View, p?: RiskPillar, c?: RiskCategory, s?: RiskSubcategory) => void }) {
   const totalRisks = riskCategories.reduce((sum, c) => sum + c.subcategories.length, 0);
   const criticalCount = riskCategories.reduce(
     (sum, c) => sum + c.subcategories.filter((s) => s.severity === "critical").length,
@@ -315,6 +315,9 @@ function DashboardView({ onNavigate }: { onNavigate: (v: View, p?: RiskPillar) =
           </div>
         ))}
       </div>
+
+      {/* Værktøj: Risiko × adoptionsfase-matrix */}
+      <RiskAdoptionMatrix onNavigate={onNavigate} />
 
       {/* Søjler */}
       <div className="grid gap-6 md:grid-cols-3">
@@ -397,6 +400,166 @@ function DashboardView({ onNavigate }: { onNavigate: (v: View, p?: RiskPillar) =
 }
 
 // ── Severity Breakdown per pillar (no chart lib needed) ──
+// ── Værktøj: Risiko × adoptionsfase matrix ──
+function RiskAdoptionMatrix({
+  onNavigate,
+}: {
+  onNavigate: (v: View, p?: RiskPillar, c?: RiskCategory, s?: RiskSubcategory) => void;
+}) {
+  const phases = [
+    { id: "experiment", label: "Eksperimenter", sub: "PoCs, sandboxes, læring", icon: "🧪" },
+    { id: "pilot", label: "Pilotering", sub: "Begrænset rollout, brugergrupper", icon: "🎯" },
+    { id: "production", label: "Produktion", sub: "Fuld deployment, end-users", icon: "⚙️" },
+    { id: "scale", label: "Skalering", sub: "Multi-system, agentic, embedded", icon: "🌐" },
+  ];
+
+  const pillarsList: { id: RiskPillar; label: string; icon: string }[] = [
+    { id: "strategy", label: "Strategi & Governance", icon: "🎯" },
+    { id: "people", label: "Mennesker & Uddannelse", icon: "👥" },
+    { id: "development", label: "Udvikling & Sikkerhed", icon: "🛡️" },
+  ];
+
+  // For each phase × pillar combination, curated 2 most-acute subcategory references
+  // (categoryId, subcategoryId). Picks driven by where in the AI lifecycle each risk
+  // typically becomes a critical concern.
+  const cells: Record<string, Record<string, { c: string; s: string }[]>> = {
+    experiment: {
+      strategy: [
+        { c: "governance-failure", s: "accountability-void" },
+        { c: "governance-failure", s: "regulatory-gaps" },
+      ],
+      people: [
+        { c: "knowledge-gaps", s: "ai-literacy" },
+        { c: "knowledge-gaps", s: "security-awareness" },
+      ],
+      development: [
+        { c: "prompt-injection", s: "direct-injection" },
+        { c: "sensitive-disclosure", s: "data-leakage" },
+      ],
+    },
+    pilot: {
+      strategy: [
+        { c: "competitive-dynamics", s: "solution-misalignment" },
+        { c: "power-centralization", s: "vendor-lock-in" },
+      ],
+      people: [
+        { c: "trust-adoption", s: "overreliance" },
+        { c: "trust-adoption", s: "organizational-mistrust" },
+      ],
+      development: [
+        { c: "prompt-injection", s: "indirect-injection" },
+        { c: "system-prompt-leakage", s: "prompt-extraction" },
+      ],
+    },
+    production: {
+      strategy: [
+        { c: "competitive-dynamics", s: "budget-resource" },
+        { c: "environmental-impact", s: "energy-consumption" },
+      ],
+      people: [
+        { c: "workforce-displacement", s: "job-displacement" },
+        { c: "discrimination-bias", s: "unfair-discrimination" },
+      ],
+      development: [
+        { c: "misinformation", s: "hallucination" },
+        { c: "system-safety", s: "lack-robustness" },
+      ],
+    },
+    scale: {
+      strategy: [
+        { c: "governance-failure", s: "agentic-governance-gap" },
+        { c: "competitive-dynamics", s: "ai-race" },
+      ],
+      people: [
+        { c: "knowledge-gaps", s: "agentic-literacy" },
+        { c: "trust-adoption", s: "human-agent-trust" },
+      ],
+      development: [
+        { c: "prompt-injection", s: "agent-goal-hijack" },
+        { c: "inter-agent-security", s: "rogue-agents" },
+      ],
+    },
+  };
+
+  const findSub = (catId: string, subId: string) => {
+    const cat = riskCategories.find((c) => c.id === catId);
+    if (!cat) return null;
+    const sub = cat.subcategories.find((s) => s.id === subId);
+    if (!sub) return null;
+    return { cat, sub };
+  };
+
+  return (
+    <div className="mb-10 rounded-xl border border-primary/30 bg-primary/5 p-6">
+      <div className="mb-1 flex items-center gap-2">
+        <span className="rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">Værktøj</span>
+        <h3 className="font-display text-lg font-semibold text-foreground">Risiko × adoptionsfase</h3>
+      </div>
+      <p className="mb-5 text-sm text-muted-foreground">
+        Hvilke risici skal du fokusere på <em>lige nu</em>? Matrixen viser de mest akutte risici i hver fase af jeres AI-adoption — to per celle, klikbar for at læse mere.
+      </p>
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr>
+              <th className="w-[16%] p-2 text-left align-bottom font-display text-xs font-semibold uppercase tracking-wide text-muted-foreground">Adoptionsfase</th>
+              {pillarsList.map((p) => (
+                <th key={p.id} className="p-2 text-left align-bottom">
+                  <p className="font-display text-xs font-semibold text-foreground">{p.icon} {p.label}</p>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {phases.map((phase) => (
+              <tr key={phase.id} className="border-t border-border/40">
+                <th className="p-3 text-left align-top">
+                  <p className="font-display text-sm font-semibold text-foreground">{phase.icon} {phase.label}</p>
+                  <p className="mt-1 text-[10px] font-normal text-muted-foreground">{phase.sub}</p>
+                </th>
+                {pillarsList.map((pillar) => {
+                  const items = cells[phase.id][pillar.id];
+                  return (
+                    <td key={pillar.id} className="p-2 align-top">
+                      <div className="flex flex-col gap-1.5">
+                        {items.map((item) => {
+                          const found = findSub(item.c, item.s);
+                          if (!found) return null;
+                          const sevAbbr =
+                            found.sub.severity === "critical"
+                              ? "kr."
+                              : found.sub.severity === "high"
+                              ? "h."
+                              : found.sub.severity === "medium"
+                              ? "m."
+                              : "l.";
+                          return (
+                            <button
+                              key={`${item.c}-${item.s}`}
+                              onClick={() => onNavigate("subcategory", pillar.id, found.cat, found.sub)}
+                              className="card-hover flex items-start gap-2 rounded-md border border-border bg-card/60 p-2 text-left"
+                            >
+                              <span className={`mt-0.5 shrink-0 rounded px-1 py-0.5 text-[9px] font-bold uppercase ${getSeverityColor(found.sub.severity)}`}>
+                                {sevAbbr}
+                              </span>
+                              <span className="flex-1 text-[11px] leading-tight text-foreground">{found.sub.name}</span>
+                              <ChevronRight className="ml-auto mt-0.5 h-3 w-3 shrink-0 text-muted-foreground" />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ── Pillar View ──
 function PillarView({
   pillar,
