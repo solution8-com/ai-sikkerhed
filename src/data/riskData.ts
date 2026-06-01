@@ -30,7 +30,9 @@ export interface Pillar {
   riskCount: number;
 }
 
-const MIT_SPREADSHEET = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQw0Pk4uwdimbx8SGAXuAeDvTRP_0Hvtlamm1LYjWtP7oOEcVGFOCKXAeq81qscsamlqfcqdEPKZJke/pubhtml";
+// MIT AI Risk Repository v4 (released 4 Dec 2025) — 1700+ risks across 9 frameworks, including agentic AI
+const MIT_SPREADSHEET = "https://airisk.mit.edu/";
+const MIT_PREPRINT = "https://doi.org/10.48550/arXiv.2408.12622";
 
 export const pillars: Pillar[] = [
   {

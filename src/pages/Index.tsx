@@ -208,7 +208,7 @@ function DashboardView({ onNavigate }: { onNavigate: (v: View, p?: RiskPillar) =
           AI Risici <span className="text-primary text-glow">Overblik</span>
         </h2>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Omfattende risikovurdering på tværs af Strategi, Mennesker og Udvikling — baseret på MIT AI Risk Repository (1700+ risici, 7 domæner), OWASP Top 10 for LLM'er 2025, OWASP Top 10 for Agentiske Applikationer 2026 og OWASP Agentic Security Initiative-guides.
+          Omfattende risikovurdering på tværs af Strategi, Mennesker og Udvikling — baseret på MIT AI Risk Repository v4 (dec 2025, 1700+ risici, 9 frameworks inkl. agentic AI), OWASP Top 10 for LLM'er 2025, OWASP Top 10 for Agentiske Applikationer 2026 og OWASP Agentic Security Initiative-guides.
         </p>
       </div>
 
@@ -277,9 +277,9 @@ function DashboardView({ onNavigate }: { onNavigate: (v: View, p?: RiskPillar) =
               MIT
             </div>
             <div>
-              <p className="font-display text-sm font-semibold text-foreground">MIT AI Risk Repository</p>
+              <p className="font-display text-sm font-semibold text-foreground">MIT AI Risk Repository v4</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                1700+ AI-risici på tværs af 7 domæner og 24 underdomæner. Inkluderer kausale og domæne-taksonomier med dokumentation fra 74 frameworks.
+                Opdateret dec 2025. 1700+ AI-risici på tværs af 7 domæner og 24 underdomæner, fra 83 frameworks (inkl. nye agentic AI-rammer). Kausale og domæne-taksonomier.
               </p>
             </div>
             <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
