@@ -1,6 +1,6 @@
 # ai-sikkerhed.dk — project status
 
-**Last updated:** 2026-06-01
+**Last updated:** 2026-06-01 (post audit-driven refresh)
 
 ## At a glance
 
@@ -46,11 +46,30 @@ npm run dev -- --port 8081
 npm run build
 ```
 
+## Audit-driven refresh (2026-06-01)
+
+Content audit recommended (1) updating OWASP LLM Top 10 URLs from 2025→2026 slugs and (2) bumping MIT AI Risk Repository to v4. Acted as follows (commit 41ccbf2):
+
+- **MIT AI Risk Repository v4** — `MIT_SPREADSHEET` constant changed from /pubhtml direct-spreadsheet link to canonical `airisk.mit.edu/` homepage. Added `MIT_PREPRINT` for arXiv:2408.12622v2. Source card label updated to "MIT AI Risk Repository v4" with note that v4 (released 4 Dec 2025) adds 9 new frameworks, 200 new risks, total 1700+, including agentic AI. Hero copy now mentions v4 explicitly.
+- **OWASP URLs NOT changed** — review-agent claimed OWASP LLM Top 10 2026 edition was out. Web-verified against `genai.owasp.org/llm-top-10/`: OWASP still serves 2025 as canonical. No changes warranted. Lesson: verify agent claims against authoritative sources before implementing.
+
 ## Known issues / open items
 
 - [ ] **MailerLite form is shared.** Same as compliance — needs sikkerhed-specific form ID for proper segmentation.
 - [ ] **Legacy field names** (`mitigations`, `mitLinks`) in riskData.ts vs. domain-neutral names elsewhere. Not blocking but inconsistent.
-- [ ] **No per-subcategory CTA card heading customization** — uses generic "Brug for sparring på denne risiko?" (already adapted to risk context, fine as is).
+
+## Identified content gaps (next round)
+
+From audit — not yet shipped:
+- [ ] **EU AI Act compliance overlap category** — entire category missing; biggest 2026 risk for Danish enterprises
+- [ ] **Shadow AI + Shadow Agents** — top people-pillar risk of 2026, not represented
+- [ ] **AI-mediated insider threat** — paraphrase/summarisation defeats DLP signatures
+- [ ] **Cognitive deskilling** — distinct from overreliance
+- [ ] **Model extraction / model theft** — distillation attacks against deployed APIs
+- [ ] **Jailbreak persistence** — jailbreaks persisting via memory poisoning across sessions
+- [ ] **Foundation-model deprecation / model drift** — provider-side silent behavior changes
+- [ ] **2025-2026 incidents to weave in:** zero-click Copilot CVE-2025-32711 (under indirect-injection), GitHub Copilot CVE-2025-53773 RCE (under unexpected-rce), agent-network worms (Moltbook), cross-tenant memory bleed, A2A protocol exploitation
+- [ ] **Visualizations:** risk likelihood × impact matrix, severity heatmap, threat taxonomy sunburst, attack-chain diagrams for top 5 agentic threats, MITRE ATLAS technique map
 
 ## Recent commits
 
