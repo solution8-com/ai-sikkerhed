@@ -86,6 +86,23 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [params.pillarId, params.categoryId, params.subcategoryId]);
 
+  // Keep tab title in sync after client-side nav (mirrors scripts/prerender.ts).
+  useEffect(() => {
+    const SITE = "AI Sikkerhed";
+    let title: string;
+    if (selectedSubcategory && selectedCategory) {
+      title = `${selectedSubcategory.name} — ${selectedCategory.name} | ${SITE}`;
+    } else if (selectedCategory) {
+      title = `${selectedCategory.name} — ${SITE}`;
+    } else if (selectedPillar) {
+      const p = pillars.find((x) => x.id === selectedPillar);
+      title = p ? `${p.name} — ${SITE}` : SITE;
+    } else {
+      title = "AI Sikkerhed – Praktisk overblik over AI-risici til danske virksomheder | MIT & OWASP";
+    }
+    document.title = title;
+  }, [selectedPillar, selectedCategory, selectedSubcategory]);
+
   const navigate = (
     newView: View,
     pillar?: RiskPillar,
