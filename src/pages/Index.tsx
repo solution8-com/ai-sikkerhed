@@ -560,6 +560,137 @@ function RiskAdoptionMatrix({
   );
 }
 
+// ── Værktøj: Attack chain mini-diagrams (MITRE ATLAS-inspireret) ──
+type AttackStep = { kind: "attacker" | "vector" | "mechanism" | "effect"; label: string; detail: string };
+type AttackChainData = {
+  title: string;
+  atlasRef?: string;
+  steps: AttackStep[];
+};
+
+const ATTACK_CHAINS: Record<string, AttackChainData> = {
+  "agent-goal-hijack": {
+    title: "Agent goal hijack via indirekte injektion",
+    atlasRef: "MITRE ATLAS AML.T0051 + OWASP ASI01 (Planning)",
+    steps: [
+      { kind: "attacker", label: "Angriber", detail: "Eksternt aktør eller intern saboteur" },
+      { kind: "vector", label: "Plant skjult instruktion", detail: "I et dokument der bliver RAG-indekseret, en email, et website-tag" },
+      { kind: "mechanism", label: "Agent læser kilde", detail: "Agentens planning-trin behandler input som instruktion" },
+      { kind: "mechanism", label: "Mål muteres", detail: "Agentens oprindelige opgave ignoreres eller subverteres" },
+      { kind: "effect", label: "Uønsket handling", detail: "Tool kald med angriberens hensigt — data-eksfil, betaling, sletning" },
+    ],
+  },
+  "indirect-injection": {
+    title: "Indirekte prompt injection",
+    atlasRef: "OWASP LLM01 + MITRE ATLAS AML.T0051.001",
+    steps: [
+      { kind: "attacker", label: "Angriber", detail: "Plant skjult tekst i offentligt indhold" },
+      { kind: "vector", label: "Inficeret kilde", detail: "Email, PDF, hjemmeside, RAG-dokument, søgeresultat, OCR'd billede" },
+      { kind: "mechanism", label: "AI ingerer kilden", detail: "LLM behandler tekst som instruktion uden differentiering mellem data og kommando" },
+      { kind: "effect", label: "Adfærdsændring", detail: "AI'en udfører angriberens skjulte instruktion under brugerens session" },
+    ],
+  },
+  "rogue-agents": {
+    title: "Rogue agent — out-of-scope adfærd",
+    atlasRef: "OWASP ASI10 (Rogue Agents) + MITRE ATLAS agentic 2026",
+    steps: [
+      { kind: "attacker", label: "Trigger", detail: "Adversarial input, drift, prompt injection eller fejl i guardrails" },
+      { kind: "mechanism", label: "Agent forsøger out-of-scope", detail: "Action der ikke er på dens allowlist eller decision class" },
+      { kind: "mechanism", label: "Guardrail blokerer", detail: "Men agenten forsøger igen — gentagne forsøg eller workaround" },
+      { kind: "effect", label: "Eskalering", detail: "Uden auto-suspend opnår agenten alligevel målet eller forårsager driftforstyrrelse" },
+    ],
+  },
+  "agentic-supply-chain": {
+    title: "Agentic supply chain — kompromitteret tool eller MCP-server",
+    atlasRef: "OWASP ASI04 (Supply Chain) + MITRE ATLAS AML.TA0007",
+    steps: [
+      { kind: "attacker", label: "Angriber", detail: "Kompromitterer et MCP-server-image, en plugin, eller en tool-leverandør" },
+      { kind: "vector", label: "Distribuér malicious tool", detail: "Via offentligt registry, typosquatting (\"ai-helper-tools-v2\"), eller direkte target" },
+      { kind: "mechanism", label: "Agent autoriserer tool", detail: "Tool får OAuth-token, scope, måske persistent identity" },
+      { kind: "effect", label: "Bagdør i agentens kontekst", detail: "Angriber kan tilgå data agenten ser, opnå laterel bevægelse, eksfiltrere" },
+    ],
+  },
+  "tool-misuse": {
+    title: "Tool misuse — agent bruger autoriseret værktøj på uautoriseret måde",
+    atlasRef: "OWASP ASI02 (Tool Use) + MITRE ATLAS AML.T0048",
+    steps: [
+      { kind: "attacker", label: "Anstødssten", detail: "Prompt injection, ambivalent brugerinstruktion, eller agent-confusion" },
+      { kind: "mechanism", label: "Agent har gyldig autorisation", detail: "Tool er på allowlist, scope er rigtigt, token er gyldig" },
+      { kind: "mechanism", label: "Bruger til andet formål", detail: "Fx 'list files' bruges til at fingerprinte system, 'send email' til phishing-kampagne mod kolleger" },
+      { kind: "effect", label: "Skadelig handling med ren autorisationssti", detail: "Audit-log viser legitim brug — sværere at detektere uden adfærdsbaseline" },
+    ],
+  },
+  "memory-context-poisoning": {
+    title: "Memory / context poisoning",
+    atlasRef: "OWASP ASI06 (Memory)",
+    steps: [
+      { kind: "attacker", label: "Angriber", detail: "Plant falske 'memories' i agentens vector store eller conversation history" },
+      { kind: "vector", label: "Persistent injection", detail: "Skadelig fact gemmes som hvis det var brugerens preference eller virksomheds-policy" },
+      { kind: "mechanism", label: "Senere session bruger memory", detail: "Agent henter falsk memory og bruger det som troværdigt grundlag" },
+      { kind: "effect", label: "Vedvarende kompromittering", detail: "Påvirker alle fremtidige sessions for samme bruger eller på tværs — cross-tenant" },
+    ],
+  },
+};
+
+function AttackChain({ subcategoryId }: { subcategoryId: string }) {
+  const data = ATTACK_CHAINS[subcategoryId];
+  if (!data) return null;
+
+  const stepColor = (kind: AttackStep["kind"]) => {
+    switch (kind) {
+      case "attacker":
+        return "border-danger/40 bg-danger/10 text-danger";
+      case "vector":
+        return "border-warning/40 bg-warning/10 text-warning";
+      case "mechanism":
+        return "border-info/40 bg-info/10 text-info";
+      case "effect":
+        return "border-danger/40 bg-danger/15 text-danger";
+    }
+  };
+  const stepLabel = (kind: AttackStep["kind"]) => {
+    switch (kind) {
+      case "attacker":
+        return "Aktør";
+      case "vector":
+        return "Vektor";
+      case "mechanism":
+        return "Mekanisme";
+      case "effect":
+        return "Effekt";
+    }
+  };
+
+  return (
+    <div className="mb-8 rounded-xl border border-primary/30 bg-primary/5 p-6">
+      <div className="mb-1 flex items-center gap-2">
+        <span className="rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">Værktøj</span>
+        <h3 className="font-display text-base font-semibold text-foreground">⚡ Attack chain — {data.title}</h3>
+      </div>
+      {data.atlasRef && (
+        <p className="mb-4 text-[11px] text-muted-foreground">Reference: {data.atlasRef}</p>
+      )}
+      <div className="flex flex-wrap items-stretch gap-2 md:flex-nowrap">
+        {data.steps.map((step, i) => (
+          <div key={i} className="flex flex-1 items-stretch gap-2">
+            <div className={`flex flex-1 flex-col gap-1 rounded-lg border p-3 ${stepColor(step.kind)}`}>
+              <span className="text-[9px] font-bold uppercase tracking-wide opacity-70">{stepLabel(step.kind)}</span>
+              <p className="font-display text-xs font-semibold leading-tight">{step.label}</p>
+              <p className="text-[10px] leading-snug opacity-80">{step.detail}</p>
+            </div>
+            {i < data.steps.length - 1 && (
+              <ChevronRight className="my-auto hidden h-5 w-5 shrink-0 text-muted-foreground md:block" />
+            )}
+          </div>
+        ))}
+      </div>
+      <p className="mt-4 text-[11px] text-muted-foreground">
+        Forsvar mod denne kæde kræver kontroller flere steder — ikke kun ved input. Se mitigeringsstrategierne nedenfor.
+      </p>
+    </div>
+  );
+}
+
 // ── Pillar View ──
 function PillarView({
   pillar,
@@ -760,6 +891,9 @@ function SubcategoryView({
           ))}
         </div>
       </div>
+
+      {/* Værktøj: MITRE ATLAS-inspireret attack chain (kun udvalgte subkategorier) */}
+      <AttackChain subcategoryId={subcategory.id} />
 
       {/* Mitigeringsstrategier */}
       <div className="mb-8 rounded-xl border border-border bg-card p-6">
