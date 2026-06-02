@@ -691,6 +691,148 @@ function AttackChain({ subcategoryId }: { subcategoryId: string }) {
   );
 }
 
+// ── Værktøj: Threat actor × AI asset matrix ──
+function ThreatActorAssetMatrix() {
+  const actors = [
+    { id: "insider", label: "Insider", note: "Utilfreds eller kompromitteret medarbejder" },
+    { id: "opportunist", label: "Eksternt opportunist", note: "Ransomware-grupper, script kiddies" },
+    { id: "nation", label: "Nation-state", note: "Advanced persistent threat" },
+    { id: "supply", label: "Supply chain", note: "Kompromitteret leverandør / MCP-server / plugin" },
+    { id: "competitor", label: "Konkurrent", note: "Industrispionage, IP-tyveri" },
+  ];
+
+  const assets = [
+    { id: "training", label: "Træningsdata" },
+    { id: "weights", label: "Modelvægte" },
+    { id: "rag", label: "RAG-korpus" },
+    { id: "prompt", label: "System prompt" },
+    { id: "identity", label: "Agent-identiteter" },
+    { id: "output", label: "Output / inference" },
+  ];
+
+  type Level = "critical" | "high" | "medium" | "low" | "na";
+  type Cell = { level: Level; tech: string };
+
+  const cells: Record<string, Record<string, Cell>> = {
+    insider: {
+      training: { level: "high", tech: "Label manipulation, etikettering" },
+      weights: { level: "critical", tech: "Direkte modeltyveri (legitim adgang)" },
+      rag: { level: "high", tech: "Indsætter giftige dokumenter" },
+      prompt: { level: "high", tech: "Lækage via chat / screenshot" },
+      identity: { level: "critical", tech: "Persistent agent-access efter offboard" },
+      output: { level: "medium", tech: "Ikke-autoriseret brug af model" },
+    },
+    opportunist: {
+      training: { level: "low", tech: "Sjældent — kræver indre adgang" },
+      weights: { level: "high", tech: "Model extraction via API-distillation" },
+      rag: { level: "high", tech: "Indirekte prompt injection via offentligt indhold" },
+      prompt: { level: "high", tech: "Prompt extraction-angreb" },
+      identity: { level: "high", tech: "Credential stuffing, OAuth-misbrug" },
+      output: { level: "medium", tech: "Sensitive info disclosure (LLM06)" },
+    },
+    nation: {
+      training: { level: "critical", tech: "Subtle backdoor-poisoning over tid" },
+      weights: { level: "critical", tech: "Advanced extraction + reverse-eng" },
+      rag: { level: "critical", tech: "Målrettet disinfo-plantning + cross-tenant" },
+      prompt: { level: "critical", tech: "Sofistikerede multi-turn extraction-kæder" },
+      identity: { level: "critical", tech: "Compromise + langvarig persistens" },
+      output: { level: "critical", tech: "Målrettet manipulation af specifikke brugere" },
+    },
+    supply: {
+      training: { level: "critical", tech: "Pre-trained model poisoning (HuggingFace)" },
+      weights: { level: "critical", tech: "LoRA / adapter backdoor i delt model" },
+      rag: { level: "high", tech: "Vendor leverer korrupt referencedata" },
+      prompt: { level: "high", tech: "Pre-baked prompts i 3rd party template" },
+      identity: { level: "critical", tech: "OAuth/token compromise via MCP-server" },
+      output: { level: "high", tech: "Backdoored output via plugin / kompromitteret API" },
+    },
+    competitor: {
+      training: { level: "low", tech: "Sjældent — kræver indre adgang" },
+      weights: { level: "high", tech: "API reverse-engineering, behavior cloning" },
+      rag: { level: "medium", tech: "Begrænset adgang" },
+      prompt: { level: "high", tech: "Prompt extraction afslører konkurrencefordel" },
+      identity: { level: "low", tech: "Begrænset relevans" },
+      output: { level: "high", tech: "Output scraping for at træne egne modeller" },
+    },
+  };
+
+  const levelStyle = (level: Level) => {
+    switch (level) {
+      case "critical":
+        return { cls: "bg-danger/15 text-danger border-danger/30", label: "Kritisk" };
+      case "high":
+        return { cls: "bg-warning/15 text-warning border-warning/30", label: "Høj" };
+      case "medium":
+        return { cls: "bg-info/15 text-info border-info/30", label: "Middel" };
+      case "low":
+        return { cls: "bg-success/15 text-success border-success/30", label: "Lav" };
+      case "na":
+        return { cls: "bg-muted/20 text-muted-foreground/60 border-border/40", label: "N/A" };
+    }
+  };
+
+  return (
+    <div className="mb-8 rounded-xl border border-primary/30 bg-primary/5 p-6">
+      <div className="mb-1 flex items-center gap-2">
+        <span className="rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">Værktøj</span>
+        <h3 className="font-display text-lg font-semibold text-foreground">Trusselsaktør × AI-aktiv</h3>
+      </div>
+      <p className="mb-5 text-sm text-muted-foreground">
+        Hvem prøver at kompromittere hvad? Brug matrixen til at scope jeres threat modelling — ikke alle aktører er interesseret i alle aktiver, og forskellige aktører kræver forskellige forsvar. Hold musen over en celle for den konkrete teknik.
+      </p>
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr>
+              <th className="sticky left-0 z-10 w-[22%] bg-card p-2 text-left align-bottom font-display text-xs font-semibold uppercase tracking-wide text-muted-foreground">Aktør</th>
+              {assets.map((a) => (
+                <th key={a.id} className="p-2 text-center align-bottom">
+                  <p className="font-display text-[11px] font-semibold text-foreground">{a.label}</p>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {actors.map((a) => (
+              <tr key={a.id} className="border-t border-border/40">
+                <th className="sticky left-0 z-10 bg-card/80 p-3 text-left align-top">
+                  <p className="font-display text-[12px] font-semibold text-foreground">{a.label}</p>
+                  <p className="mt-0.5 text-[10px] font-normal leading-tight text-muted-foreground">{a.note}</p>
+                </th>
+                {assets.map((asset) => {
+                  const cell = cells[a.id][asset.id];
+                  const sty = levelStyle(cell.level);
+                  return (
+                    <td key={asset.id} className="p-1 align-middle">
+                      <div
+                        className={`mx-auto flex h-8 w-full max-w-[80px] items-center justify-center rounded border px-1 font-display text-[10px] font-semibold ${sty.cls}`}
+                        title={`${sty.label}: ${cell.tech}`}
+                      >
+                        {sty.label}
+                      </div>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-1.5 text-[10px] md:grid-cols-4">
+        {(["critical", "high", "medium", "low"] as Level[]).map((level) => {
+          const sty = levelStyle(level);
+          return (
+            <span key={level} className="inline-flex items-center gap-1.5">
+              <span className={`inline-block h-3 w-6 rounded ${sty.cls.split(" ")[0]}`} />
+              <span className="text-muted-foreground">{sty.label}</span>
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Pillar View ──
 function PillarView({
   pillar,
@@ -720,6 +862,9 @@ function PillarView({
         </div>
         <p className="mt-3 max-w-2xl text-sm text-muted-foreground">{pillarData.description}</p>
       </div>
+
+      {/* Værktøj: Threat actor × AI asset matrix (kun Udvikling-pillar) */}
+      {pillar === "development" && <ThreatActorAssetMatrix />}
 
       <div className="grid gap-4">
         {categories.map((cat) => {
