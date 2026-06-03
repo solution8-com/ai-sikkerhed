@@ -4,7 +4,7 @@
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { pillars, riskCategories } from "../src/data/riskData";
+import { pillars, riskCategories, toolsMeta } from "../src/data/riskData";
 
 const SITE_ORIGIN = "https://ai-sikkerhed.dk";
 const SITE_NAME = "AI Sikkerhed";
@@ -72,6 +72,28 @@ type SitemapEntry = { loc: string; priority: string };
 const sitemap: SitemapEntry[] = [{ loc: `${SITE_ORIGIN}/`, priority: "1.0" }];
 
 let count = 0;
+
+// Værktøjs-oversigt + per-tool sider (canonical /vaerktoejer/<slug>)
+const toolsCanonical = `${SITE_ORIGIN}/vaerktoejer/`;
+generatePage("vaerktoejer", {
+  title: `Værktøjer — interaktive AI-sikkerhedsværktøjer | ${SITE_NAME}`,
+  description:
+    "Interaktive værktøjer til AI-sikkerhed: risiko × adoptionsfase-matrix, trusselsaktør × AI-aktiv-matrix og mitigation-modenhedsradar. Del direkte på LinkedIn eller i mail.",
+  canonical: toolsCanonical,
+});
+sitemap.push({ loc: toolsCanonical, priority: "0.8" });
+count++;
+
+for (const tool of toolsMeta) {
+  const toolCanonical = `${SITE_ORIGIN}/vaerktoejer/${tool.slug}/`;
+  generatePage(`vaerktoejer/${tool.slug}`, {
+    title: `${tool.title} — Værktøj | ${SITE_NAME}`,
+    description: tool.description,
+    canonical: toolCanonical,
+  });
+  sitemap.push({ loc: toolCanonical, priority: "0.7" });
+  count++;
+}
 
 for (const pillar of pillars) {
   const canonical = `${SITE_ORIGIN}/${pillar.id}/`;

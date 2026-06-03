@@ -1383,3 +1383,42 @@ export const getSeverityBg = (severity: RiskSeverity): string => {
 export const getRisksByPillar = (pillar: RiskPillar): RiskCategory[] => {
   return riskCategories.filter((r) => r.pillar === pillar);
 };
+
+// ── Værktøjer: metadata for canonical /vaerktoejer/<slug> URLs ──
+// Component-free so it can be imported by both the SPA (Index.tsx) and the
+// prerender script (scripts/prerender.ts). Index.tsx maps each slug to its
+// React component; the prerender script emits per-tool meta + sitemap entries.
+export interface ToolMeta {
+  slug: string;
+  title: string;
+  shortPitch: string; // 1 sentence for the teaser card
+  description: string; // 2-3 sentences for meta tags + tool-page lede
+  icon: string;
+}
+
+export const toolsMeta: ToolMeta[] = [
+  {
+    slug: "risiko-adoption",
+    title: "Risiko × adoptionsfase",
+    shortPitch: "Hvilke AI-risici er akutte i netop jeres fase? 4 faser × 3 søjler med klikbare risici.",
+    description:
+      "Matrix over 4 adoptionsfaser (eksperimenter → pilotering → produktion → skalering) × 3 risikosøjler, med de mest akutte risici kurateret per celle. Svarer på \"vi er i pilot — hvilke risici skal vi se på nu?\" Klik en celle for at springe direkte til risikoen.",
+    icon: "🧭",
+  },
+  {
+    slug: "trusselsaktoer-matrix",
+    title: "Trusselsaktør × AI-aktiv",
+    shortPitch: "Hvem angriber hvad? 5 trusselsaktører × 6 AI-aktiver med konkrete teknikker.",
+    description:
+      "Matrix over 5 trusselsaktører (insider, opportunist, nation-state, supply chain, konkurrent) × 6 AI-aktiver (træningsdata, modelvægte, RAG-korpus, system prompt, agent-identiteter, output) med trusselsniveau og konkret teknik i hver celle.",
+    icon: "🎯",
+  },
+  {
+    slug: "mitigation-radar",
+    title: "Mitigation-modenhedsradar",
+    shortPitch: "Hvor moden er jeres AI-sikkerhed? Interaktiv selvvurdering på 6 akser.",
+    description:
+      "Interaktiv selvvurderings-radar på 6 akser (detection, prevention, response m.fl.) med 4 modenhedsniveauer per akse — fra ad hoc til optimeret. Få et visuelt øjebliksbillede af jeres AI-sikkerhedsmodenhed og hvor I bør investere næst.",
+    icon: "📡",
+  },
+];

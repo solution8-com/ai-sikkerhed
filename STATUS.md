@@ -1,6 +1,22 @@
 # ai-sikkerhed.dk — project status
 
-**Last updated:** 2026-06-03 (post content-gaps batch — 7 new subcategories + 3 enhancements)
+**Last updated:** 2026-06-03 — tool-URL refactor shipped (UX sprint 2/3).
+
+## Tool-URL refactor (UX sprint 2/3) — shipped 2026-06-03
+
+3 tools promoted to canonical, prerendered `/vaerktoejer/<slug>` URLs:
+
+| Slug | Tool | Was inline on |
+|---|---|---|
+| `risiko-adoption` | Risiko × adoptionsfase | dashboard |
+| `trusselsaktoer-matrix` | Trusselsaktør × AI-aktiv | Udvikling pillar |
+| `mitigation-radar` | Mitigation-modenhedsradar | Strategi pillar |
+
+- `AttackChain` stays **inline** on its 6 agentic subcategories (contextual to each).
+- **Site-specific gotcha:** `RiskAdoptionMatrix` takes `onNavigate` (clickable cells), so here `ToolConfig.Component` is typed `ComponentType<{ onNavigate }>` and `ToolPage` passes `onNavigate` through — unlike compliance/governance whose promoted tools are prop-free (`() => JSX.Element`).
+- Tool metadata in `riskData.ts` (`toolsMeta`), shared by `Index.tsx` + `prerender.ts`. New `ToolTeaserCard`/`ToolsIndex`/`ToolPage`; "Værktøjer" header nav; Breadcrumbs extended (`tool`/`toolsRoot`/`onTools`). Build: 87 routes + sitemap. Hydration verified via headless Chrome (incl. clickable matrix on the tool page).
+
+
 
 ## At a glance
 

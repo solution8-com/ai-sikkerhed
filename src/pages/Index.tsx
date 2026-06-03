@@ -1,16 +1,18 @@
-import { useState, useMemo, useRef, useEffect, type FormEvent } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useMemo, useRef, useEffect, type FormEvent, type ComponentType } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import logo from "@/assets/logo.png";
-import { ExternalLink, ChevronRight, ChevronDown, Search } from "lucide-react";
+import { ExternalLink, ChevronRight, ChevronDown, Search, Wrench, ArrowLeft } from "lucide-react";
 import {
   pillars,
   riskCategories,
   getRisksByPillar,
   getSeverityColor,
   getSeverityBg,
+  toolsMeta,
   type RiskPillar,
   type RiskCategory,
   type RiskSubcategory,
+  type ToolMeta,
 } from "@/data/riskData";
 
 type View = "dashboard" | "pillar" | "category" | "subcategory";
@@ -43,24 +45,75 @@ function Highlight({ text, query }: { text: string; query: string }) {
 const pillarName = (id: RiskPillar) =>
   id === "strategy" ? "Strategi" : id === "people" ? "Mennesker" : "Udvikling";
 
+// ── Værktøjer: canonical /vaerktoejer/<slug> URLs ──
+// Metadata lives in riskData.ts (toolsMeta) so the prerender script can reuse
+// it; here we attach each tool's React component. Inline rendering on content
+// pages becomes a teaser card linking to the canonical URL. AttackChain stays
+// inline on its 6 agentic subcategories (it answers each subcategory's question)
+// so it is deliberately absent from this list.
+type ToolNavigate = (v: View, p?: RiskPillar, c?: RiskCategory, s?: RiskSubcategory) => void;
+type ToolConfig = ToolMeta & { Component: ComponentType<{ onNavigate: ToolNavigate }> };
+
+const TOOL_COMPONENTS: Record<string, ComponentType<{ onNavigate: ToolNavigate }>> = {
+  "risiko-adoption": RiskAdoptionMatrix,
+  "trusselsaktoer-matrix": ThreatActorAssetMatrix,
+  "mitigation-radar": MitigationMaturityRadar,
+};
+
+const tools: ToolConfig[] = toolsMeta.map((meta) => ({
+  ...meta,
+  Component: TOOL_COMPONENTS[meta.slug],
+}));
+
+const getTool = (slug: string): ToolConfig =>
+  tools.find((t) => t.slug === slug) ?? tools[0];
+
 function Breadcrumbs({
   pillar,
   category,
   subcategory,
+  tool,
+  toolsRoot,
   onHome,
   onPillar,
   onCategory,
+  onTools,
 }: {
   pillar?: { id: RiskPillar; name: string };
   category?: { id: string; name: string };
   subcategory?: { id: string; name: string };
+  tool?: { name: string };
+  toolsRoot?: boolean;
   onHome: () => void;
   onPillar?: () => void;
   onCategory?: () => void;
+  onTools?: () => void;
 }) {
   const sep = (
     <span aria-hidden="true" className="text-muted-foreground/40">›</span>
   );
+
+  // Tools path: Overblik › Værktøjer [› Tool name]
+  if (toolsRoot || tool) {
+    return (
+      <nav aria-label="Brødkrummer" className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+        <button onClick={onHome} className="hover:text-primary transition-colors">Overblik</button>
+        {sep}
+        {tool ? (
+          <button onClick={onTools} className="hover:text-primary transition-colors">Værktøjer</button>
+        ) : (
+          <span className="text-foreground font-medium" aria-current="page">Værktøjer</span>
+        )}
+        {tool && (
+          <>
+            {sep}
+            <span className="text-foreground font-medium" aria-current="page">{tool.name}</span>
+          </>
+        )}
+      </nav>
+    );
+  }
+
   return (
     <nav aria-label="Brødkrummer" className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
       <button onClick={onHome} className="hover:text-primary transition-colors">Overblik</button>
@@ -114,9 +167,18 @@ const sourceBadgeClass = (source: string): string => {
 };
 
 const Index = () => {
-  const params = useParams<{ pillarId?: string; categoryId?: string; subcategoryId?: string }>();
+  const params = useParams<{ pillarId?: string; categoryId?: string; subcategoryId?: string; toolId?: string }>();
   const routerNavigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Tools route detection (literal /vaerktoejer segment)
+  const isToolsRoute =
+    location.pathname === "/vaerktoejer" || location.pathname.startsWith("/vaerktoejer/");
+  const selectedTool: ToolConfig | null = useMemo(
+    () => (params.toolId ? tools.find((t) => t.slug === params.toolId) ?? null : null),
+    [params.toolId]
+  );
 
   const selectedPillar: RiskPillar | null = useMemo(() => {
     if (!params.pillarId) return null;
@@ -143,24 +205,30 @@ const Index = () => {
     : "dashboard";
 
   useEffect(() => {
-    if (params.pillarId && !selectedPillar) {
+    if (params.toolId && !selectedTool) {
+      routerNavigate("/vaerktoejer", { replace: true });
+    } else if (params.pillarId && !selectedPillar) {
       routerNavigate("/", { replace: true });
     } else if (params.categoryId && selectedPillar && !selectedCategory) {
       routerNavigate(`/${selectedPillar}`, { replace: true });
     } else if (params.subcategoryId && selectedCategory && !selectedSubcategory) {
       routerNavigate(`/${selectedPillar}/${selectedCategory.id}`, { replace: true });
     }
-  }, [params.pillarId, params.categoryId, params.subcategoryId, selectedPillar, selectedCategory, selectedSubcategory, routerNavigate]);
+  }, [params.pillarId, params.categoryId, params.subcategoryId, params.toolId, selectedPillar, selectedCategory, selectedSubcategory, selectedTool, routerNavigate]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [params.pillarId, params.categoryId, params.subcategoryId]);
+  }, [params.pillarId, params.categoryId, params.subcategoryId, params.toolId]);
 
   // Keep tab title in sync after client-side nav (mirrors scripts/prerender.ts).
   useEffect(() => {
     const SITE = "AI Sikkerhed";
     let title: string;
-    if (selectedSubcategory && selectedCategory) {
+    if (isToolsRoute && selectedTool) {
+      title = `${selectedTool.title} — Værktøj | ${SITE}`;
+    } else if (isToolsRoute) {
+      title = `Værktøjer — interaktive AI-sikkerhedsværktøjer | ${SITE}`;
+    } else if (selectedSubcategory && selectedCategory) {
       title = `${selectedSubcategory.name} — ${selectedCategory.name} | ${SITE}`;
     } else if (selectedCategory) {
       title = `${selectedCategory.name} — ${SITE}`;
@@ -171,7 +239,7 @@ const Index = () => {
       title = "AI Sikkerhed – Praktisk overblik over AI-risici til danske virksomheder | MIT & OWASP";
     }
     document.title = title;
-  }, [selectedPillar, selectedCategory, selectedSubcategory]);
+  }, [selectedPillar, selectedCategory, selectedSubcategory, isToolsRoute, selectedTool]);
 
   const navigate = (
     newView: View,
@@ -199,6 +267,9 @@ const Index = () => {
       routerNavigate("/");
     }
   };
+
+  const openTool = (slug: string) => routerNavigate(`/vaerktoejer/${slug}`);
+  const openToolsIndex = () => routerNavigate("/vaerktoejer");
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -261,6 +332,16 @@ const Index = () => {
               <kbd className="pointer-events-none absolute right-2 top-1/2 hidden h-5 -translate-y-1/2 select-none items-center gap-0.5 rounded border border-border bg-background px-1.5 text-[10px] font-medium text-muted-foreground sm:flex">⌘K</kbd>
             </div>
             <div className="flex gap-2">
+              <button
+                onClick={openToolsIndex}
+                className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition-colors ${
+                  isToolsRoute
+                    ? "border-primary/50 bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary"
+                }`}
+              >
+                <Wrench className="h-3 w-3" /> Værktøjer
+              </button>
               <a
                 href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQw0Pk4uwdimbx8SGAXuAeDvTRP_0Hvtlamm1LYjWtP7oOEcVGFOCKXAeq81qscsamlqfcqdEPKZJke/pubhtml"
                 target="_blank"
@@ -370,12 +451,22 @@ const Index = () => {
           </div>
         )}
 
-        {/* Dashboard */}
-        {!searchQuery && view === "dashboard" && <DashboardView onNavigate={navigate} />}
-        {!searchQuery && view === "pillar" && selectedPillar && (
-          <PillarView pillar={selectedPillar} onNavigate={navigate} onBack={goBack} />
+        {/* Værktøjer */}
+        {!searchQuery && isToolsRoute && selectedTool && (
+          <ToolPage tool={selectedTool} onNavigate={navigate} onHome={() => navigate("dashboard")} onTools={openToolsIndex} />
         )}
-        {!searchQuery && view === "category" && selectedCategory && (
+        {!searchQuery && isToolsRoute && !selectedTool && (
+          <ToolsIndex onHome={() => navigate("dashboard")} onOpenTool={openTool} />
+        )}
+
+        {/* Dashboard */}
+        {!searchQuery && !isToolsRoute && view === "dashboard" && (
+          <DashboardView onNavigate={navigate} onOpenTool={openTool} />
+        )}
+        {!searchQuery && !isToolsRoute && view === "pillar" && selectedPillar && (
+          <PillarView pillar={selectedPillar} onNavigate={navigate} onBack={goBack} onOpenTool={openTool} />
+        )}
+        {!searchQuery && !isToolsRoute && view === "category" && selectedCategory && (
           <CategoryView category={selectedCategory} onNavigate={navigate} onBack={goBack} />
         )}
         {!searchQuery && view === "subcategory" && selectedSubcategory && selectedCategory && (
@@ -415,7 +506,13 @@ const Index = () => {
 };
 
 // ── Dashboard View ──
-function DashboardView({ onNavigate }: { onNavigate: (v: View, p?: RiskPillar, c?: RiskCategory, s?: RiskSubcategory) => void }) {
+function DashboardView({
+  onNavigate,
+  onOpenTool,
+}: {
+  onNavigate: (v: View, p?: RiskPillar, c?: RiskCategory, s?: RiskSubcategory) => void;
+  onOpenTool: (slug: string) => void;
+}) {
   const totalRisks = riskCategories.reduce((sum, c) => sum + c.subcategories.length, 0);
   const criticalCount = riskCategories.reduce(
     (sum, c) => sum + c.subcategories.filter((s) => s.severity === "critical").length,
@@ -449,8 +546,10 @@ function DashboardView({ onNavigate }: { onNavigate: (v: View, p?: RiskPillar, c
         ))}
       </div>
 
-      {/* Værktøj: Risiko × adoptionsfase-matrix */}
-      <RiskAdoptionMatrix onNavigate={onNavigate} />
+      {/* Værktøj: Risiko × adoptionsfase-matrix (teaser → canonical URL) */}
+      <div className="mb-6">
+        <ToolTeaserCard tool={getTool("risiko-adoption")} onOpen={onOpenTool} />
+      </div>
 
       {/* Søjler */}
       <div className="grid gap-6 md:grid-cols-3">
@@ -1182,10 +1281,12 @@ function PillarView({
   pillar,
   onNavigate,
   onBack,
+  onOpenTool,
 }: {
   pillar: RiskPillar;
   onNavigate: (v: View, p?: RiskPillar, c?: RiskCategory) => void;
   onBack: () => void;
+  onOpenTool: (slug: string) => void;
 }) {
   const pillarData = pillars.find((p) => p.id === pillar)!;
   const categories = getRisksByPillar(pillar);
@@ -1209,10 +1310,18 @@ function PillarView({
       </div>
 
       {/* Værktøj: Threat actor × AI asset matrix (kun Udvikling-pillar) */}
-      {pillar === "development" && <ThreatActorAssetMatrix />}
+      {pillar === "development" && (
+        <div className="mb-6">
+          <ToolTeaserCard tool={getTool("trusselsaktoer-matrix")} onOpen={onOpenTool} />
+        </div>
+      )}
 
       {/* Værktøj: Mitigation maturity radar (kun Strategi-pillar) */}
-      {pillar === "strategy" && <MitigationMaturityRadar />}
+      {pillar === "strategy" && (
+        <div className="mb-6">
+          <ToolTeaserCard tool={getTool("mitigation-radar")} onOpen={onOpenTool} />
+        </div>
+      )}
 
       <div className="grid gap-4">
         {categories.map((cat) => {
@@ -1597,6 +1706,92 @@ function NewsletterCTA() {
         </div>
       </div>
     </section>
+  );
+}
+
+// ── Værktøjs-teaser-kort (erstatter inline-rendering på indholdssider) ──
+function ToolTeaserCard({ tool, onOpen }: { tool: ToolConfig; onOpen: (slug: string) => void }) {
+  return (
+    <button
+      onClick={() => onOpen(tool.slug)}
+      className="card-hover group flex h-full w-full items-start gap-4 rounded-xl border border-primary/30 bg-primary/5 p-5 text-left"
+    >
+      <span className="text-2xl leading-none">{tool.icon}</span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">Værktøj</span>
+          <p className="font-display text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{tool.title}</p>
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">{tool.shortPitch}</p>
+        <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
+          Åbn værktøj <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+        </span>
+      </div>
+    </button>
+  );
+}
+
+// ── Værktøjs-oversigt (/vaerktoejer) ──
+function ToolsIndex({ onHome, onOpenTool }: { onHome: () => void; onOpenTool: (slug: string) => void }) {
+  return (
+    <div className="fade-in">
+      <Breadcrumbs toolsRoot onHome={onHome} />
+
+      <div className="mb-8">
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">🧰</span>
+          <h2 className="font-display text-2xl font-bold text-foreground">Værktøjer</h2>
+        </div>
+        <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
+          Interaktive værktøjer til AI-sikkerhed — risiko-matricer, trusselsmodellering og modenheds-selvvurdering. Hvert værktøj har sin egen side, så det kan deles direkte på LinkedIn, i mail eller i en præsentation.
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {tools.map((tool) => (
+          <ToolTeaserCard key={tool.slug} tool={tool} onOpen={onOpenTool} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Værktøjs-side (/vaerktoejer/<slug>) ──
+function ToolPage({
+  tool,
+  onNavigate,
+  onHome,
+  onTools,
+}: {
+  tool: ToolConfig;
+  onNavigate: ToolNavigate;
+  onHome: () => void;
+  onTools: () => void;
+}) {
+  const ToolComponent = tool.Component;
+  return (
+    <div className="fade-in">
+      <Breadcrumbs tool={{ name: tool.title }} onHome={onHome} onTools={onTools} />
+
+      <div className="mb-8">
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">{tool.icon}</span>
+          <h1 className="font-display text-2xl font-bold text-foreground">
+            {tool.title} <span className="text-primary text-glow">Værktøj</span>
+          </h1>
+        </div>
+        <p className="mt-3 max-w-3xl text-sm text-muted-foreground">{tool.description}</p>
+      </div>
+
+      <ToolComponent onNavigate={onNavigate} />
+
+      <button
+        onClick={onTools}
+        className="mt-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
+      >
+        <ArrowLeft className="h-4 w-4" /> Alle værktøjer
+      </button>
+    </div>
   );
 }
 
