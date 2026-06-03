@@ -1,6 +1,6 @@
 # ai-sikkerhed.dk — project status
 
-**Last updated:** 2026-06-01 (post audit + viz + search upgrade)
+**Last updated:** 2026-06-03 (post content-gaps batch — 7 new subcategories + 3 enhancements)
 
 ## At a glance
 
@@ -23,9 +23,9 @@ DNS migration on 2026-06-01: changed GoDaddy records from Lovable to Netlify. Ce
 
 - **3 pillars:** Strategi & Governance / Mennesker & Uddannelse / Udvikling & Sikkerhed
 - **22 categories**
-- **51 sub-risks**
-- **25 critical risks** flagged
-- Source frameworks: MIT AI Risk Repository (1700+ risks across 7 domains), OWASP Top 10 for LLM Applications 2025, OWASP Top 10 for Agentic Applications 2026, OWASP Agentic Security Initiative guides
+- **58 sub-risks** (was 51; +7 added 2026-06-03 covering 2026 incidents: EchoLeak CVE-2025-32711, Agentic IDE RCE CVE-2025-53773, Shadow AI, A2A protocol risks, model extraction, cross-user memory contamination, EU AI Act security mapping)
+- **27 critical risks** flagged (was 25)
+- Source frameworks: MIT AI Risk Repository (1700+ risks across 7 domains), OWASP Top 10 for LLM Applications 2025, OWASP Top 10 for Agentic Applications 2026, OWASP Agentic Security Initiative guides. Source-type union extended 2026-06-03 to include CVE / MSRC / Research / CSA / Industry / EU for 2026-incident references.
 
 Note: this site uses the ORIGINAL Lovable-era field names in `riskData.ts` (`mitigations`, `mitLinks`, `RiskPillar`, `RiskCategory`, `RiskSubcategory`) — NOT the domain-neutral names that compliance and governance use. Refactoring is low-priority but possible if we ever extract a shared template.
 
