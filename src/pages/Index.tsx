@@ -43,6 +43,25 @@ function Highlight({ text, query }: { text: string; query: string }) {
 const pillarName = (id: RiskPillar) =>
   id === "strategy" ? "Strategi" : id === "people" ? "Mennesker" : "Udvikling";
 
+const sourceBadgeClass = (source: string): string => {
+  switch (source) {
+    case "MIT":
+    case "MSRC":
+      return "bg-info/15 text-info";
+    case "OWASP":
+    case "CSA":
+      return "bg-warning/15 text-warning";
+    case "CVE":
+      return "bg-danger/15 text-danger";
+    case "EU":
+      return "bg-primary/15 text-primary";
+    case "Research":
+    case "Industry":
+    default:
+      return "bg-muted text-muted-foreground";
+  }
+};
+
 const Index = () => {
   const params = useParams<{ pillarId?: string; categoryId?: string; subcategoryId?: string }>();
   const routerNavigate = useNavigate();
@@ -1260,7 +1279,7 @@ function CategoryView({
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 rounded border border-border p-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
               >
-                <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${link.source === "MIT" ? "bg-info/15 text-info" : "bg-warning/15 text-warning"}`}>
+                <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${sourceBadgeClass(link.source)}`}>
                   {link.source}
                 </span>
                 <span className="flex-1">{link.label}</span>
@@ -1344,7 +1363,7 @@ function SubcategoryView({
               rel="noopener noreferrer"
               className="card-hover flex items-center gap-3 rounded-lg border border-border p-4"
             >
-              <span className={`rounded px-2 py-1 text-[10px] font-bold ${link.source === "MIT" ? "bg-info/15 text-info" : "bg-warning/15 text-warning"}`}>
+              <span className={`rounded px-2 py-1 text-[10px] font-bold ${sourceBadgeClass(link.source)}`}>
                 {link.source}
               </span>
               <span className="flex-1 text-sm text-secondary-foreground">{link.label}</span>

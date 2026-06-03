@@ -1,5 +1,14 @@
 export type RiskSeverity = "critical" | "high" | "medium" | "low";
 export type RiskPillar = "strategy" | "people" | "development";
+export type SourceType =
+  | "MIT"
+  | "OWASP"
+  | "CVE"
+  | "MSRC"
+  | "Research"
+  | "CSA"
+  | "Industry"
+  | "EU";
 
 export interface RiskSubcategory {
   id: string;
@@ -7,7 +16,7 @@ export interface RiskSubcategory {
   description: string;
   severity: RiskSeverity;
   mitigations: string[];
-  mitLinks: { label: string; url: string; source: "MIT" | "OWASP" }[];
+  mitLinks: { label: string; url: string; source: SourceType }[];
   tags: string[];
 }
 
@@ -18,7 +27,7 @@ export interface RiskCategory {
   icon: string;
   description: string;
   subcategories: RiskSubcategory[];
-  sourceLinks: { label: string; url: string; source: "MIT" | "OWASP" }[];
+  sourceLinks: { label: string; url: string; source: SourceType }[];
 }
 
 export interface Pillar {
@@ -34,6 +43,27 @@ export interface Pillar {
 const MIT_SPREADSHEET = "https://airisk.mit.edu/";
 const MIT_PREPRINT = "https://doi.org/10.48550/arXiv.2408.12622";
 
+// 2026 incident references
+const CVE_ECHOLEAK = "https://nvd.nist.gov/vuln/detail/cve-2025-32711";
+const MSRC_ECHOLEAK = "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-32711";
+const AIM_LABS_ECHOLEAK = "https://arxiv.org/abs/2509.10540";
+const CVE_COPILOT_RCE = "https://www.cve.org/CVERecord?id=CVE-2025-53773";
+const MSRC_COPILOT_RCE = "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-53773";
+const REHBERGER_COPILOT = "https://embracethered.com/blog/posts/2025/github-copilot-remote-code-execution-via-prompt-injection/";
+const CSA_A2A = "https://cloudsecurityalliance.org/blog/2025/04/30/threat-modeling-google-s-a2a-protocol-with-the-maestro-framework";
+const A2A_BENCHMARK = "https://arxiv.org/pdf/2507.21146";
+const A2A_SAFEGUARDS = "https://arxiv.org/abs/2505.12490";
+const CYBERHAVEN_REPORT = "https://www.cyberhaven.com/resources/report/ai-adoption-risk-report-2026";
+const MS_WTI_2026 = "https://www.microsoft.com/en-us/worklab/work-trend-index";
+const MODEL_EXTRACTION_SURVEY = "https://arxiv.org/abs/2506.22521";
+const REHBERGER_SPAIWARE = "https://embracethered.com/blog/posts/2024/chatgpt-hacking-memories/";
+const MEMORYGRAFT = "https://arxiv.org/pdf/2512.16962";
+const PROMPTFOO_CROSSUSER = "https://www.promptfoo.dev/lm-security-db/vuln/benign-cross-user-contamination-6ea37d04";
+const LITELLM_INCIDENT = "https://www.trendmicro.com/en_us/research/26/c/inside-litellm-supply-chain-compromise.html";
+const EU_AIACT_ART15 = "https://artificialintelligenceact.eu/article/15/";
+const EU_AIACT_ART9 = "https://artificialintelligenceact.eu/article/9/";
+const NIST_RMF_MAPPING = "https://www.nist.gov/itl/ai-risk-management-framework";
+
 export const pillars: Pillar[] = [
   {
     id: "strategy",
@@ -41,7 +71,7 @@ export const pillars: Pillar[] = [
     subtitle: "Afstemning, budget & compliance",
     description: "Risici fra utilstrækkelig AI-strategi, governance-rammer, manglende regeloverholdelse, forkert budgetallokering og fejlvalg af AI-løsninger.",
     icon: "🎯",
-    riskCount: 18,
+    riskCount: 20,
   },
   {
     id: "people",
@@ -57,7 +87,7 @@ export const pillars: Pillar[] = [
     subtitle: "Tekniske risici & sårbarheder",
     description: "Tekniske risici herunder prompt injection, dataforgiftning, modelsårbarheder, fejlhåndtering af output, forsyningskædeangreb og agentiske AI-trusler.",
     icon: "🛡️",
-    riskCount: 38,
+    riskCount: 43,
   },
 ];
 
@@ -119,6 +149,43 @@ export const riskCategories: RiskCategory[] = [
           { label: "OWASP: MCP Servers Security Cheat Sheet", url: "/docs/MCP-Servers-Security-CheatSheet.pdf", source: "OWASP" },
         ],
         tags: ["agentisk", "governance", "MCP", "agentidentitet"],
+      },
+      {
+        id: "shadow-ai",
+        name: "Shadow AI & shadow agents",
+        description: "Uautoriseret brug af AI-værktøjer og egen-byggede agenter uden om godkendt governance. Cyberhaven 2026: 39,7% af AI-interaktioner indeholder følsomme data, ~98% af organisationer har shadow AI. Mellem-laget af shadow agents (egen-byggede LLM-integrationer der overlever deres skaber) er en ny og særligt vanskelig vektor.",
+        severity: "high",
+        mitigations: [
+          "Udrul en AI-gateway/proxy foran godkendte LLM'er med DLP-egress-inspektion; blokér direkte browser-adgang til usanktionerede endpoints på firewall/SASE-niveau",
+          "Inventér AI-agenter med samme disciplin som SaaS: CASB-discovery + identitetslogs afdækker unsanctioned brug",
+          "Publicér en kort, sanktioneret AI-værktøjsliste med klassifikationsregler; kombinér med uddannelse, ikke kun blokering",
+          "Anvend dataklassifikationsetiketter (Purview/MIP) og blokér 'Fortroligt+' fra at forlade sanktionerede LLM'er",
+          "Kræv navngivet ejerskab for hver intern agent (register + udløbsdato) for at undgå at shadow agents overlever deres skaber",
+        ],
+        mitLinks: [
+          { label: "Cyberhaven: AI Adoption & Risk Report 2026", url: CYBERHAVEN_REPORT, source: "Industry" },
+          { label: "Microsoft Work Trend Index 2026", url: MS_WTI_2026, source: "Industry" },
+        ],
+        tags: ["shadow-ai", "DLP", "AI-gateway", "agent-register"],
+      },
+      {
+        id: "eu-ai-act-security-mapping",
+        name: "EU AI Act ↔ sikkerheds-frameworks (Art 9/15)",
+        description: "EU AI Act Art 9 (risikostyring) og Art 15 (nøjagtighed, robusthed, cybersikkerhed) er de to artikler der mest direkte stiller sikkerhedskrav til høj-risiko AI-systemer. De mapper til NIST AI RMF MS-2.5/2.6/2.7 og ISO/IEC 42001 — som igen udvider ISO 27001. Fulde bøder (op til €35M / 7% omsætning) gælder fra 2. august 2026.",
+        severity: "medium",
+        mitigations: [
+          "Byg en kontrol-matrix: EU AI Act Art 9/15 → NIST AI RMF MS-2.5/2.6/2.7 → ISO 42001 → eksisterende ISO 27001/SOC 2-kontroller. Genbrug eksisterende evidens hvor muligt",
+          "Brug OWASP LLM Top 10 (2025) som teknisk test-katalog for Art 15-krav om robusthed og cybersikkerhed",
+          "Dokumentér adversarial testing, model-evasion og post-market monitoring (Art 72) som del af jeres ISO 27001 ISMS",
+          "Map MIT AI Risk Repository-kategorier til jeres risikoregister så identifikation er reviderbar",
+          "Udpeg én accountable rolle (AI risk owner) der bygger bro mellem CISO, DPO og produkt — Art 9 forventer livscyklus-ejerskab",
+        ],
+        mitLinks: [
+          { label: "EU AI Act Art 15 (robusthed & cybersikkerhed)", url: EU_AIACT_ART15, source: "EU" },
+          { label: "EU AI Act Art 9 (risikostyringssystem)", url: EU_AIACT_ART9, source: "EU" },
+          { label: "NIST AI Risk Management Framework", url: NIST_RMF_MAPPING, source: "Research" },
+        ],
+        tags: ["EU-AI-Act", "compliance", "NIST-AI-RMF", "ISO-42001"],
       },
     ],
     sourceLinks: [
@@ -510,17 +577,19 @@ export const riskCategories: RiskCategory[] = [
       {
         id: "indirect-injection",
         name: "Indirekte prompt injection",
-        description: "Ondsindede instruktioner indlejret i eksterne datakilder, som LLM'en behandler, hvilket fører til utilsigtede handlinger.",
+        description: "Ondsindede instruktioner indlejret i eksterne datakilder, som LLM'en behandler, hvilket fører til utilsigtede handlinger. Den definitive 2025-case er EchoLeak (CVE-2025-32711, M365 Copilot) — zero-click via e-mail der aldrig blev åbnet, eksfiltrerede tenant-data via auto-fetched billeder.",
         severity: "critical",
         mitigations: [
           "Validér og sanitér alle eksterne datakilder",
           "Implementér privilegieseparation for datatilgang",
           "Brug indholdssikkerhedspolitikker for hentede data",
+          "Begrænse outbound CSP/allowlist på AI-agenter (lærdom fra EchoLeak: Microsoft Teams var whitelisted og blev exfiltrerings-kanal)",
         ],
         mitLinks: [
           { label: "OWASP: LLM01 Prompt Injection", url: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/", source: "OWASP" },
+          { label: "CVE-2025-32711 EchoLeak case study", url: CVE_ECHOLEAK, source: "CVE" },
         ],
-        tags: ["injection", "ekstern-data", "RAG"],
+        tags: ["injection", "ekstern-data", "RAG", "EchoLeak"],
       },
       {
         id: "agent-goal-hijack",
@@ -541,11 +610,31 @@ export const riskCategories: RiskCategory[] = [
         ],
         tags: ["agentisk", "goal-hijack", "flertrins", "autonom"],
       },
+      {
+        id: "echoleak-zero-click",
+        name: "EchoLeak — zero-click prompt injection (CVE-2025-32711)",
+        description: "Verdens første dokumenterede zero-click prompt injection i et produktions-LLM. CVSS 9.3, opdaget af Aim Labs og fixed af Microsoft 11. juni 2025. En enkelt e-mail (aldrig åbnet af offeret) kunne få M365 Copilot til at exfiltrere tenant-data næste gang brugeren stillede et relateret spørgsmål. Patched server-side; ingen kundehandling krævet, ingen kendt udnyttelse i felten — men det er den nye baseline trusselmodel for RAG-baserede assistenter.",
+        severity: "critical",
+        mitigations: [
+          "Begrænse eller deaktivere ekstern e-mail som grounding-kilde for Copilot hvor det er forretningsmæssigt forsvarligt",
+          "Håndhæv striks outbound CSP/allowlist på AI-agenter — inkluderet Teams/SharePoint proxy-domæner — og audit hvad jeres tenant whitelister",
+          "Behandl alt hentet indhold (e-mail, SharePoint, web) som ubetroet input; deploy en prompt-injection-classifier FORAN, ikke kun INDE i modellen",
+          "Log og alarmér ved Copilot outbound image/link-hentninger til ikke-Microsoft-domæner",
+          "Tilføj DLP egress-inspektion mellem Copilot og eksterne endpoints; blokér markdown reference-link rendering hvor muligt",
+        ],
+        mitLinks: [
+          { label: "CVE-2025-32711 (NVD)", url: CVE_ECHOLEAK, source: "CVE" },
+          { label: "Microsoft MSRC advisory", url: MSRC_ECHOLEAK, source: "MSRC" },
+          { label: "Aim Labs EchoLeak paper (arXiv)", url: AIM_LABS_ECHOLEAK, source: "Research" },
+        ],
+        tags: ["zero-click", "RAG", "Copilot", "2025-incident", "CVE"],
+      },
     ],
     sourceLinks: [
       { label: "OWASP Top 10 – LLM01: Prompt Injection", url: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/", source: "OWASP" },
       { label: "MIT AI Risk Repository – Security Vulnerabilities (2.2)", url: MIT_SPREADSHEET, source: "MIT" },
       { label: "OWASP ASI01: Agent Goal Hijack", url: "/docs/OWASP-Top-10-Agentic-Applications-2026.pdf", source: "OWASP" },
+      { label: "CVE-2025-32711 — EchoLeak (Microsoft 365 Copilot)", url: CVE_ECHOLEAK, source: "CVE" },
     ],
   },
   {
@@ -586,10 +675,29 @@ export const riskCategories: RiskCategory[] = [
         ],
         tags: ["privatliv", "inferens", "overvågning"],
       },
+      {
+        id: "model-extraction",
+        name: "Model-ekstraktion & API-distillation",
+        description: "Angribere der bruger gentagne API-forespørgsler til at rekonstruere en proprietær model, dens system-prompt eller dens træningsdata. SIGKDD 2025-survey kategoriserer angrebene i tre: funktionalitets-ekstraktion (API-distillation), træningsdata-ekstraktion og prompt-rettet ekstraktion (system-prompt-stealing). Defenses fokuserer på query-pattern-detektion, output-watermarking og restriktioner på logits.",
+        severity: "medium",
+        mitigations: [
+          "Anvend per-API-key og per-IP rate limiting plus anomali-detektion på query-distribution (entropi, emne-spredning)",
+          "Indlejr kryptografiske output-watermarks for proprietære modeller; scan periodisk konkurrent-output for mærker",
+          "Begræns adgang til top-k logits / log-probabilities — de accelererer distillation massivt",
+          "Brug proof-of-work eller graduated pricing for at hæve ekstraktions-omkostning uden at skade legitime brugere",
+          "Behandl system-prompts som hemmeligheder: minimér deres informationsindhold, defense-test mod prompt-leak før launch",
+        ],
+        mitLinks: [
+          { label: "SIGKDD 2025: Model Extraction Survey", url: MODEL_EXTRACTION_SURVEY, source: "Research" },
+          { label: "MIT: AI Security Vulnerabilities (2.2)", url: MIT_SPREADSHEET, source: "MIT" },
+        ],
+        tags: ["model-extraction", "IP-tyveri", "watermarking", "rate-limiting"],
+      },
     ],
     sourceLinks: [
       { label: "OWASP Top 10 – LLM02: Sensitive Information Disclosure", url: "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/", source: "OWASP" },
       { label: "MIT AI Risk Repository – Privacy (2.1)", url: MIT_SPREADSHEET, source: "MIT" },
+      { label: "SIGKDD 2025 Model Extraction Survey", url: MODEL_EXTRACTION_SURVEY, source: "Research" },
     ],
   },
   {
@@ -633,7 +741,7 @@ export const riskCategories: RiskCategory[] = [
       {
         id: "agentic-supply-chain",
         name: "Agentiske forsyningskædesårbarheder (ASI04)",
-        description: "Runtime-sammensætning af agenter, værktøjer og MCP-servere fra tredjeparter, der introducerer forgiftede prompt-skabeloner, tool-descriptor injection, typosquattede endpoints, kompromitterede MCP-/registry-servere og agent-in-the-middle-angreb via forfalskede agent cards.",
+        description: "Runtime-sammensætning af agenter, værktøjer og MCP-servere fra tredjeparter, der introducerer forgiftede prompt-skabeloner, tool-descriptor injection, typosquattede endpoints, kompromitterede MCP-/registry-servere og agent-in-the-middle-angreb via forfalskede agent cards. Konkret 2026-case: LiteLLM (populært AI-gateway-bibliotek) blev kompromitteret via PyPI i marts 2026 — viser at proxy/gateway-laget nu er et angrebsoverflade på linje med modellen selv.",
         severity: "critical",
         mitigations: [
           "Signér og attestér manifester, prompts og værktøjsdefinitioner; kræv SBOMs og AIBOMs med periodiske attesteringer",
@@ -647,14 +755,16 @@ export const riskCategories: RiskCategory[] = [
           { label: "OWASP ASI04: Agentic Supply Chain Vulnerabilities", url: "/docs/OWASP-Top-10-Agentic-Applications-2026.pdf", source: "OWASP" },
           { label: "OWASP: Agentic AI Threats (T17 Supply Chain)", url: "/docs/Agentic-AI-Threats-and-Mitigations.pdf", source: "OWASP" },
           { label: "OWASP: MCP Servers Security Cheat Sheet", url: "/docs/MCP-Servers-Security-CheatSheet.pdf", source: "OWASP" },
+          { label: "Trend Micro: LiteLLM supply-chain compromise (Mar 2026)", url: LITELLM_INCIDENT, source: "Research" },
         ],
-        tags: ["agentisk", "forsyningskæde", "MCP", "typosquatting", "AIBOM"],
+        tags: ["agentisk", "forsyningskæde", "MCP", "typosquatting", "AIBOM", "LiteLLM"],
       },
     ],
     sourceLinks: [
       { label: "OWASP Top 10 – LLM03: Supply Chain", url: "https://genai.owasp.org/llmrisk/llm032025-supply-chain/", source: "OWASP" },
       { label: "OWASP ASI04: Agentic Supply Chain Vulnerabilities", url: "/docs/OWASP-Top-10-Agentic-Applications-2026.pdf", source: "OWASP" },
       { label: "OWASP MCP Servers Security Cheat Sheet v1.0", url: "/docs/MCP-Servers-Security-CheatSheet.pdf", source: "OWASP" },
+      { label: "Trend Micro: LiteLLM supply-chain (Mar 2026)", url: LITELLM_INCIDENT, source: "Research" },
     ],
   },
   {
@@ -725,10 +835,30 @@ export const riskCategories: RiskCategory[] = [
         ],
         tags: ["RCE", "kodeeksekvering", "sandkasseflugt", "agentisk", "vibe-coding"],
       },
+      {
+        id: "agentic-ide-rce",
+        name: "Agentic IDE RCE (CVE-2025-53773)",
+        description: "CVSS 7.8 prompt-injection-til-RCE i GitHub Copilot i Visual Studio (Johann Rehberger, juni 2025; patched i august Patch Tuesday). Et forgiftet README, dependency eller GitHub-issue kunne stille instruktioner der fik Copilot til selv at skrive 'chat.tools.autoApprove: true' i .vscode/settings.json — hvorefter agenten kunne køre arbitrære shell-kommandoer og redigere filer uden bekræftelse. En wormable variant ('ZombAI') propagerer ved at skrive samme injection i andre repos udvikleren rører.",
+        severity: "high",
+        mitigations: [
+          "Patch Visual Studio til 17.14.12+ og audit .vscode/settings.json på tværs af repos for 'chat.tools.autoApprove'",
+          "Deaktivér eksperimental auto-approve / YOLO mode på org policy-niveau; kræv human-in-the-loop for shell- og file-write-værktøjer",
+          "Sandbox Copilot/agent-eksekvering i dev containers uden host-shell eller credential-adgang",
+          "Behandl 3.-parts repos, READMEs og issues som ubetroet input — review før de åbnes med agent aktiveret",
+          "Overvåg for pludselige settings-fil-commits fra agentic IDE-sessioner",
+        ],
+        mitLinks: [
+          { label: "CVE-2025-53773", url: CVE_COPILOT_RCE, source: "CVE" },
+          { label: "Microsoft MSRC advisory", url: MSRC_COPILOT_RCE, source: "MSRC" },
+          { label: "Rehberger: GitHub Copilot RCE write-up", url: REHBERGER_COPILOT, source: "Research" },
+        ],
+        tags: ["RCE", "Copilot", "IDE", "YOLO-mode", "2025-incident", "CVE"],
+      },
     ],
     sourceLinks: [
       { label: "OWASP Top 10 – LLM05: Improper Output Handling", url: "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/", source: "OWASP" },
       { label: "OWASP ASI05: Unexpected Code Execution (RCE)", url: "/docs/OWASP-Top-10-Agentic-Applications-2026.pdf", source: "OWASP" },
+      { label: "CVE-2025-53773 — GitHub Copilot RCE i Visual Studio", url: CVE_COPILOT_RCE, source: "CVE" },
     ],
   },
   {
@@ -864,13 +994,35 @@ export const riskCategories: RiskCategory[] = [
         mitLinks: [
           { label: "OWASP ASI06: Memory & Context Poisoning", url: "/docs/OWASP-Top-10-Agentic-Applications-2026.pdf", source: "OWASP" },
           { label: "OWASP: Agentic AI Threats (T1 Memory Poisoning)", url: "/docs/Agentic-AI-Threats-and-Mitigations.pdf", source: "OWASP" },
+          { label: "Rehberger: SPAIWARE — ChatGPT memory persistence", url: REHBERGER_SPAIWARE, source: "Research" },
+          { label: "MemoryGraft — long-term memory exploitation (2026)", url: MEMORYGRAFT, source: "Research" },
         ],
-        tags: ["agentisk", "hukommelsesforgiftning", "RAG", "kontekst", "krydsagent"],
+        tags: ["agentisk", "hukommelsesforgiftning", "RAG", "kontekst", "krydsagent", "persistence"],
+      },
+      {
+        id: "cross-user-contamination",
+        name: "Cross-user jailbreak persistence via shared memory",
+        description: "Jailbreaks og ondsindede instruktioner kan persistere på tværs af sessioner — og bløde mellem brugere — når en LLM bruger delt langtidshukommelse eller delt retrieval-state. Rehbergers SPAIWARE-arbejde (ChatGPT memory, 2024) viste at en indirekte prompt-injection via billede, Google Doc eller connected app kan skrive angriber-instruktioner i ChatGPT's persistente hukommelse, der fortsætter med at exfiltrere data i hver efterfølgende samtale. Nyere arbejde (MemoryGraft, AgentPoison) udvider dette til RAG-agenter.",
+        severity: "high",
+        mitigations: [
+          "Deaktivér long-term memory for agenter der håndterer følsomme data, eller scope hukommelse stramt per opgave",
+          "Behandl memory writes som sikkerhedshændelser: log dem, gør dem synlige for brugeren, og kræv bekræftelse før de persisterer",
+          "Sanitér al hentet hukommelse før injection i prompten (strip instruktioner, URLs, tool-calls); brug en separat 'memory firewall'-model",
+          "Prune og re-index hukommelseslagre periodisk; tilbyd brugeren én-klik 'wipe memory'",
+          "For multi-bruger-agenter: del aldrig memory-namespace mellem brugere; nøgl alt på user ID + tenant ID",
+        ],
+        mitLinks: [
+          { label: "Rehberger: ChatGPT Memory SPAIWARE write-up", url: REHBERGER_SPAIWARE, source: "Research" },
+          { label: "MemoryGraft paper (2026)", url: MEMORYGRAFT, source: "Research" },
+          { label: "Promptfoo: Cross-user contamination vulnerability", url: PROMPTFOO_CROSSUSER, source: "Research" },
+        ],
+        tags: ["memory", "persistence", "cross-user", "RAG", "SPAIWARE"],
       },
     ],
     sourceLinks: [
       { label: "OWASP Top 10 – LLM08: Vector & Embedding Weaknesses", url: "https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/", source: "OWASP" },
       { label: "OWASP ASI06: Memory & Context Poisoning", url: "/docs/OWASP-Top-10-Agentic-Applications-2026.pdf", source: "OWASP" },
+      { label: "Rehberger: SPAIWARE / Memory persistence research", url: REHBERGER_SPAIWARE, source: "Research" },
     ],
   },
   {
@@ -1137,11 +1289,31 @@ export const riskCategories: RiskCategory[] = [
         ],
         tags: ["MCP", "værktøjsinterferens", "multiserver", "kontekstisolering"],
       },
+      {
+        id: "a2a-protocol-risks",
+        name: "A2A-protokol-eksponering (Google Agent2Agent)",
+        description: "Google's A2A-protokol (lanceret april 2025, nu under Linux Foundation, 150+ partnere) er den nye standard for agent-til-agent-kommunikation. 2025 trusselsmodeller og akademiske PoC'er identificerer agent-card forgery, capability spoofing, task replay, tool-shadowing og cross-agent prompt injection — med rapporterede attack success rates på 60-86% mod uhærdede deployments. Endnu ingen bekræftede in-the-wild brud, men trusselmodellen er reel.",
+        severity: "high",
+        mitigations: [
+          "Kræv signerede, kortlivede OAuth-tokens for hvert A2A-kald; afvis langlivede bearer tokens",
+          "Validér agent cards mod et betroet register; pin kendte agent-identiteter i stedet for at stole på discovery",
+          "Håndhæv capability scoping: downstream-agenter accepterer kun deklarerede tool calls inden for et delegeret scope",
+          "Log fulde A2A-message-kæder (parent task ID, kaldende agent, payload hash) til forensisk replay",
+          "Kør en 'A2A gateway' der stripper/karantæner ubetroede instruktioner før de når en downstream-agents planner",
+        ],
+        mitLinks: [
+          { label: "CSA: Threat-modeling Google's A2A (MAESTRO)", url: CSA_A2A, source: "CSA" },
+          { label: "A2A Sensitive Data Safeguards (arXiv)", url: A2A_SAFEGUARDS, source: "Research" },
+          { label: "Quantitative A2A security benchmark (arXiv)", url: A2A_BENCHMARK, source: "Research" },
+        ],
+        tags: ["A2A", "multi-agent", "protokol", "agent-card", "capability-spoofing"],
+      },
     ],
     sourceLinks: [
       { label: "OWASP MCP Servers Security Cheat Sheet v1.0", url: "/docs/MCP-Servers-Security-CheatSheet.pdf", source: "OWASP" },
       { label: "OWASP Securing Agentic Applications Guide v1.0", url: "/docs/Securing-Agentic-Applications-Guide.pdf", source: "OWASP" },
       { label: "OWASP Top 10 for Agentic Applications 2026", url: "/docs/OWASP-Top-10-Agentic-Applications-2026.pdf", source: "OWASP" },
+      { label: "CSA: Threat-modeling Google's A2A protocol", url: CSA_A2A, source: "CSA" },
     ],
   },
   {
