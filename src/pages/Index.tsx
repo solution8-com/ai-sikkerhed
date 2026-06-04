@@ -308,6 +308,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <a href="#hovedindhold" className="skip-link">Spring til indhold</a>
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto flex items-center justify-between px-6 py-4">
@@ -371,7 +372,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-8">
+      <main id="hovedindhold" className="container mx-auto px-6 py-8">
         {/* Søgeresultater */}
         {searchQuery && (
           <div className="fade-in mb-8">
@@ -523,9 +524,9 @@ function DashboardView({
     <div className="fade-in">
       {/* Hero */}
       <div className="mb-10">
-        <h2 className="font-display text-3xl font-bold text-foreground">
+        <h1 className="font-display text-3xl font-bold text-foreground">
           AI Risici <span className="text-primary text-glow">Overblik</span>
-        </h2>
+        </h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           Omfattende risikovurdering på tværs af Strategi, Mennesker og Udvikling — baseret på MIT AI Risk Repository v4 (dec 2025, 1700+ risici, 9 frameworks inkl. agentic AI), OWASP Top 10 for LLM'er 2025, OWASP Top 10 for Agentiske Applikationer 2026 og OWASP Agentic Security Initiative-guides.
         </p>
@@ -546,10 +547,18 @@ function DashboardView({
         ))}
       </div>
 
-      {/* Værktøj: Risiko × adoptionsfase-matrix (teaser → canonical URL) */}
-      <div className="mb-6">
-        <ToolTeaserCard tool={getTool("risiko-adoption")} onOpen={onOpenTool} />
-      </div>
+      {/* Værktøjer-sektion — alle sitets værktøjer, synlige fra dashboardet */}
+      <section aria-labelledby="vaerktoejer-heading" className="mb-8">
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2 id="vaerktoejer-heading" className="font-display text-lg font-semibold text-foreground">Interaktive værktøjer</h2>
+          <span className="text-xs text-muted-foreground">Klik for at åbne · kan deles</span>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {tools.map((t) => (
+            <ToolTeaserCard key={t.slug} tool={t} onOpen={onOpenTool} />
+          ))}
+        </div>
+      </section>
 
       {/* Søjler */}
       <div className="grid gap-6 md:grid-cols-3">
