@@ -120,6 +120,18 @@ for (const tool of toolsMeta) {
   count++;
 }
 
+// Tværgående tema: Agentisk AI (/agentisk)
+const agenticCanonical = `${SITE_ORIGIN}/agentisk/`;
+generatePage("agentisk", {
+  title: `Agentisk AI-sikkerhed — tværgående tema | ${SITE_NAME}`,
+  description:
+    "Samlet overblik over agentiske AI-sikkerhedsrisici på tværs af strategi, mennesker og udvikling: agent goal hijack, værktøjsmisbrug, MCP/A2A, multi-agent og hukommelsesforgiftning.",
+  canonical: agenticCanonical,
+  breadcrumb: [ROOT_CRUMB, { name: "Agentisk AI", url: agenticCanonical }],
+});
+sitemap.push({ loc: agenticCanonical, priority: "0.8" });
+count++;
+
 for (const pillar of pillars) {
   const canonical = `${SITE_ORIGIN}/${pillar.id}/`;
   generatePage(pillar.id, {
