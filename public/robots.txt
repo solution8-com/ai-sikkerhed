@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://ai-sikkerhed.dk/sitemap.xml
+Sitemap: https://www.ai-sikkerhed.dk/sitemap.xml

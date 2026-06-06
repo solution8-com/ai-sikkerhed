@@ -6,7 +6,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { pillars, riskCategories, toolsMeta } from "../src/data/riskData";
 
-const SITE_ORIGIN = "https://ai-sikkerhed.dk";
+const SITE_ORIGIN = "https://www.ai-sikkerhed.dk";
 const SITE_NAME = "AI Sikkerhed";
 const DIST = "dist";
 
