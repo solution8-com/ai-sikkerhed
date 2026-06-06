@@ -18,6 +18,9 @@ import {
 type View = "dashboard" | "pillar" | "category" | "subcategory";
 
 const CALENDLY_URL = "https://calendly.com/ai-raadgivning_jacob/30min?month=2026-06";
+
+// Clickable example searches shown in the empty/no-results state.
+const SEARCH_SUGGESTIONS = ["prompt injection", "agentisk", "shadow AI", "MCP", "EchoLeak", "mitigering"];
 // MailerLite form — shared with compliance temporarily; swap to a sikkerhed-specific form once created
 const MAILERLITE_ACTION = "https://assets.mailerlite.com/jsonp/1571946/forms/189012812467536974/subscribe";
 
@@ -346,6 +349,13 @@ const Index = () => {
                 placeholder="Søg i risici..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setSearchQuery("");
+                    e.currentTarget.blur();
+                  }
+                }}
+                aria-label="Søg i risici"
                 className="h-9 w-64 rounded-md border border-border bg-secondary pl-9 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
               <kbd className="pointer-events-none absolute right-2 top-1/2 hidden h-5 -translate-y-1/2 select-none items-center gap-0.5 rounded border border-border bg-background px-1.5 text-[10px] font-medium text-muted-foreground sm:flex">⌘K</kbd>
@@ -401,7 +411,21 @@ const Index = () => {
               </span>
             </h2>
             {searchResults.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Ingen risici matcher din søgning.</p>
+              <div className="text-sm text-muted-foreground">
+                <p>Ingen risici matcher "{searchQuery}". Tjek stavning, eller prøv et af disse:</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {SEARCH_SUGGESTIONS.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setSearchQuery(s)}
+                      className="rounded-full border border-border px-3 py-1 text-xs text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground/70">Tip: tryk Esc for at rydde søgningen.</p>
+              </div>
             ) : (
               <>
                 {categoryHits.length > 0 && (
