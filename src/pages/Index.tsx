@@ -502,8 +502,9 @@ const Index = () => {
         )}
       </main>
 
-      {/* Newsletter + CTA strip */}
-      <NewsletterCTA />
+      {/* Newsletter + CTA strip — hide booking column on subcategory pages
+          (they already have a contextual "Book sparring" card). */}
+      <NewsletterCTA showBooking={view !== "subcategory"} />
 
       {/* Footer */}
       <footer className="border-t border-border bg-card/50 py-6">
@@ -1694,7 +1695,7 @@ function InlineNewsletterPrompt({ hook, topic }: { hook: string; topic: string }
 }
 
 // ── Newsletter + main CTA strip ──
-function NewsletterCTA() {
+function NewsletterCTA({ showBooking = true }: { showBooking?: boolean }) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [email, setEmail] = useState("");
 
@@ -1721,7 +1722,7 @@ function NewsletterCTA() {
 
   return (
     <section className="border-t border-border bg-card/30 py-12">
-      <div className="container mx-auto grid gap-8 px-6 md:grid-cols-2">
+      <div className={`container mx-auto px-6 ${showBooking ? "grid gap-8 md:grid-cols-2" : "max-w-2xl"}`}>
         <div className="rounded-xl border border-border bg-card p-6">
           <h3 className="font-display text-lg font-semibold text-foreground">📬 Nyhedsbrev: AI Sikkerhed i praksis</h3>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -1755,20 +1756,22 @@ function NewsletterCTA() {
             <p className="mt-2 text-xs text-danger">Noget gik galt. Prøv igen om lidt.</p>
           )}
         </div>
-        <div className="rounded-xl border border-primary/30 bg-primary/5 p-6">
-          <h3 className="font-display text-lg font-semibold text-foreground">🗓️ Book 30-min sparring</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Konkret sparring om jeres AI-risikobillede — kortlægning, mitigeringer, governance, leverandørsikkerhed eller noget helt andet.
-          </p>
-          <a
-            href={CALENDLY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-block rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-          >
-            Book et møde
-          </a>
-        </div>
+        {showBooking && (
+          <div className="rounded-xl border border-primary/30 bg-primary/5 p-6">
+            <h3 className="font-display text-lg font-semibold text-foreground">🗓️ Book 30-min sparring</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Konkret sparring om jeres AI-risikobillede — kortlægning, mitigeringer, governance, leverandørsikkerhed eller noget helt andet.
+            </p>
+            <a
+              href={CALENDLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              Book et møde
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );
