@@ -9,6 +9,7 @@ import {
   getSeverityColor,
   getSeverityBg,
   toolsMeta,
+  type RiskSeverity,
   type RiskPillar,
   type RiskCategory,
   type RiskSubcategory,
@@ -1458,6 +1459,11 @@ function CategoryView({
   onBack: () => void;
 }) {
   const [expandedSource, setExpandedSource] = useState(false);
+  const [sevFilter, setSevFilter] = useState<"all" | RiskSeverity>("all");
+  const sevOrder: RiskSeverity[] = ["critical", "high", "medium", "low"];
+  const sevText: Record<string, string> = { all: "Alle", critical: "Kritisk", high: "Høj", medium: "Middel", low: "Lav" };
+  const sevCount = (s: RiskSeverity) => category.subcategories.filter((x) => x.severity === s).length;
+  const shownSubs = sevFilter === "all" ? category.subcategories : category.subcategories.filter((s) => s.severity === sevFilter);
 
   return (
     <div className="fade-in">
@@ -1478,9 +1484,29 @@ function CategoryView({
         <p className="mt-3 max-w-3xl text-sm text-muted-foreground">{category.description}</p>
       </div>
 
+      {/* Severity-filter-chips */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        {(["all", ...sevOrder] as ("all" | RiskSeverity)[]).map((key) => {
+          const count = key === "all" ? category.subcategories.length : sevCount(key as RiskSeverity);
+          if (count === 0) return null;
+          const active = sevFilter === key;
+          return (
+            <button
+              key={key}
+              onClick={() => setSevFilter(key)}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                active ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+              }`}
+            >
+              {sevText[key]} <span className="opacity-60">{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* Underkategorier */}
       <div className="mb-8 grid gap-4">
-        {category.subcategories.map((sub) => (
+        {shownSubs.map((sub) => (
           <button
             key={sub.id}
             onClick={() => onNavigate("subcategory", category.pillar, category, sub)}
