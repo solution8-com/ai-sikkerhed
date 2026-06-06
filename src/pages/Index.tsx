@@ -1463,11 +1463,16 @@ function CategoryView({
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <p className="font-display text-sm font-semibold text-foreground">{sub.name}</p>
                   <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${getSeverityColor(sub.severity)}`}>
                     {sub.severity === "critical" ? "kritisk" : sub.severity === "high" ? "høj" : sub.severity === "medium" ? "middel" : "lav"}
                   </span>
+                  {sub.mitigations.length > 0 && (
+                    <span className="inline-flex items-center gap-1 rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                      🛡️ {sub.mitigations.length} {sub.mitigations.length === 1 ? "mitigering" : "mitigeringer"}
+                    </span>
+                  )}
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">{sub.description}</p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
