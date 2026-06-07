@@ -549,6 +549,12 @@ const Index = () => {
             En oversigt fra{" "}
             <a href="https://ai-raadgivning.dk" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">AI Rådgivning</a>.
           </p>
+          <p className="mt-3 text-muted-foreground/80">
+            Søsteroverblik:{" "}
+            <a href="https://www.ai-compliance.dk" className="text-primary hover:underline">AI Compliance</a>
+            {" · "}
+            <a href="https://www.ai-governance.dk" className="text-primary hover:underline">AI Governance</a>
+          </p>
         </div>
       </footer>
     </div>
