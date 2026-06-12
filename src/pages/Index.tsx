@@ -536,24 +536,24 @@ const Index = () => {
         <div className="container mx-auto px-6 text-center text-xs text-muted-foreground">
           <p>
             Risikodata baseret på{" "}
-            <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQw0Pk4uwdimbx8SGAXuAeDvTRP_0Hvtlamm1LYjWtP7oOEcVGFOCKXAeq81qscsamlqfcqdEPKZJke/pubhtml" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQw0Pk4uwdimbx8SGAXuAeDvTRP_0Hvtlamm1LYjWtP7oOEcVGFOCKXAeq81qscsamlqfcqdEPKZJke/pubhtml" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">
               MIT AI Risk Repository
             </a>{" "}
             og{" "}
-            <a href="https://genai.owasp.org/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            <a href="https://genai.owasp.org/" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">
               OWASP GenAI Security Project
             </a>
             . For alle detaljer, besøg de originale repositories.
           </p>
           <p className="mt-3">
             En oversigt fra{" "}
-            <a href="https://ai-raadgivning.dk" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">AI Rådgivning</a>.
+            <a href="https://ai-raadgivning.dk" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">AI Rådgivning</a>.
           </p>
           <p className="mt-3 text-muted-foreground/80">
             Søsteroverblik:{" "}
-            <a href="https://www.ai-compliance.dk" className="text-primary hover:underline">AI Compliance</a>
+            <a href="https://www.ai-compliance.dk" className="text-primary underline underline-offset-2">AI Compliance</a>
             {" · "}
-            <a href="https://www.ai-governance.dk" className="text-primary hover:underline">AI Governance</a>
+            <a href="https://www.ai-governance.dk" className="text-primary underline underline-offset-2">AI Governance</a>
           </p>
         </div>
       </footer>
@@ -638,7 +638,7 @@ function DashboardView({
               <div className="mb-4 flex items-center justify-between">
                 <span className="text-3xl">{pillar.icon}</span>
                 {criticals > 0 && (
-                  <span className="risk-pulse rounded-full bg-danger/15 px-2.5 py-0.5 text-xs font-medium text-danger">
+                  <span className="rounded-full bg-danger/15 px-2.5 py-0.5 text-xs font-medium text-danger">
                     {criticals} kritiske
                   </span>
                 )}
@@ -646,7 +646,7 @@ function DashboardView({
               <h3 className="font-display text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
                 {pillar.name}
               </h3>
-              <p className="mt-0.5 text-xs font-medium text-primary/70">{pillar.subtitle}</p>
+              <p className="mt-0.5 text-xs font-medium text-primary">{pillar.subtitle}</p>
               <p className="mt-3 text-sm text-muted-foreground line-clamp-3">{pillar.description}</p>
               <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                 <span>{categories.length} risikokategorier</span>
@@ -1447,7 +1447,7 @@ function PillarView({
           <span className="text-3xl">{pillarData.icon}</span>
           <div>
             <h1 className="font-display text-2xl font-bold text-foreground">{pillarData.name}</h1>
-            <p className="text-sm text-primary/70">{pillarData.subtitle}</p>
+            <p className="text-sm text-primary">{pillarData.subtitle}</p>
           </div>
         </div>
         <p className="mt-3 max-w-2xl text-sm text-muted-foreground">{pillarData.description}</p>
