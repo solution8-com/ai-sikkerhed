@@ -1,53 +1,53 @@
 {
-  "generatedAt": "2026-06-08T14:59:11.742Z",
+  "generatedAt": "2026-06-12T18:22:51.406Z",
   "items": [
     {
-      "title": "AI Phishing Is Crushing SOCs with Alert Volume: How to Reduce Tier 1 Overload",
-      "link": "https://thehackernews.com/2026/06/ai-phishing-is-crushing-socs-with-alert.html",
+      "title": "Agentjacking Attack Tricks AI Coding Agents Into Running Malicious Code",
+      "link": "https://thehackernews.com/2026/06/agentjacking-attack-tricks-ai-coding.html",
       "source": "The Hacker News",
-      "date": "2026-06-08T13:19:13.000Z"
+      "date": "2026-06-12T12:04:33.000Z"
     },
     {
-      "title": "New ChatGPT Lockdown Mode Limits Tools That Could Enable Data Exfiltration",
-      "link": "https://thehackernews.com/2026/06/new-chatgpt-lockdown-mode-limits-tools.html",
+      "title": "Rethinking MDR as Attackers and Defenders Embrace AI",
+      "link": "https://thehackernews.com/2026/06/rethinking-mdr-as-attackers-and.html",
       "source": "The Hacker News",
-      "date": "2026-06-06T13:36:57.000Z"
+      "date": "2026-06-12T11:00:00.000Z"
     },
     {
-      "title": "Free Apps Are Quietly Turning Smart TVs Into Web-Scraping Proxies for AI",
-      "link": "https://thehackernews.com/2026/06/free-apps-are-quietly-turning-smart-tvs.html",
+      "title": "LangGraph Flaw Chain Exposes Self-Hosted AI Agents to Remote Code Execution",
+      "link": "https://thehackernews.com/2026/06/langgraph-flaw-chain-exposes-self.html",
       "source": "The Hacker News",
-      "date": "2026-06-06T08:29:05.000Z"
+      "date": "2026-06-12T09:50:36.000Z"
     },
     {
-      "title": "AI Agent Uncovers 21 Zero-Days in FFmpeg; Chrome Patches Record 429 Bugs",
-      "link": "https://thehackernews.com/2026/06/ai-agent-uncovers-21-zero-days-in.html",
+      "title": "New Attacks Trick OpenClaw AI Agent Into Running Code and Leaking Secrets",
+      "link": "https://thehackernews.com/2026/06/new-attacks-trick-openclaw-ai-agent.html",
       "source": "The Hacker News",
-      "date": "2026-06-06T07:28:30.000Z"
+      "date": "2026-06-11T17:46:32.000Z"
     },
     {
-      "title": "Only 10% of SOCs Say They’re Getting Excellent Value From AI. Here’s What the Second Wave Has to Deliver",
-      "link": "https://thehackernews.com/2026/06/only-10-of-socs-say-theyre-getting.html",
+      "title": "ThreatsDay Bulletin: Worm Code Leaked, AI Agent Phished, Claude Code Patch + 28 New Stories",
+      "link": "https://thehackernews.com/2026/06/threatsday-bulletin-worm-code-leaked-ai.html",
       "source": "The Hacker News",
-      "date": "2026-06-05T11:20:00.000Z"
+      "date": "2026-06-11T13:20:41.000Z"
     },
     {
-      "title": "Claude Code GitHub Action Flaw Let One Malicious Issue Hijack Repositories",
-      "link": "https://thehackernews.com/2026/06/claude-code-github-action-flaw-let-one.html",
+      "title": "AI Broke Vulnerability Management. That's Why CISOs Are Moving Budget to BAS.",
+      "link": "https://thehackernews.com/2026/06/ai-broke-vulnerability-management-thats.html",
       "source": "The Hacker News",
-      "date": "2026-06-04T15:15:26.000Z"
+      "date": "2026-06-11T11:30:00.000Z"
     },
     {
-      "title": "Agentic AI Is Transforming Defense, But Only Secure IT Infrastructure Will Maximize It",
-      "link": "https://thehackernews.com/2026/06/agentic-ai-is-transforming-defense-but.html",
+      "title": "Anthropic Releases Claude Fable 5, Its Most Powerful AI Yet, With Cyber Safeguards",
+      "link": "https://thehackernews.com/2026/06/anthropic-releases-claude-fable-5-its.html",
       "source": "The Hacker News",
-      "date": "2026-06-04T15:10:00.000Z"
+      "date": "2026-06-10T07:37:59.000Z"
     },
     {
-      "title": "ThreatsDay Bulletin: AI Agents Gone Wrong, Sketchy C2 Tools, ClickFix Tricks, JS Backdoors & 20+ New Stories",
-      "link": "https://thehackernews.com/2026/06/threatsday-bulletin-ai-agents-gone.html",
+      "title": "Meta to Use Off-Site Business Data for Feed and AI Personalization",
+      "link": "https://thehackernews.com/2026/06/meta-to-use-off-site-business-data-for.html",
       "source": "The Hacker News",
-      "date": "2026-06-04T14:00:49.000Z"
+      "date": "2026-06-09T17:03:58.000Z"
     }
   ]
 }
